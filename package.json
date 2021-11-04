@@ -1,0 +1,37 @@
+{
+  "name": "rsplatoon-profile",
+  "version": "1.0.0",
+  "description": "Profiles for r/Splatoon users",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shatindle/rsplatoon-profile.git"
+  },
+  "keywords": [
+    "r/splatoon",
+    "splatoon",
+    "profile",
+    "friendcode"
+  ],
+  "author": "sha.tindle@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shatindle/rsplatoon-profile/issues"
+  },
+  "homepage": "https://github.com/shatindle/rsplatoon-profile#readme",
+  "dependencies": {
+    "@google-cloud/firestore": "^4.15.1",
+    "cookie-parser": "^1.4.5",
+    "discord.js": "^13.3.1",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "node-fetch": "^2.6.1",
+    "url": "^0.11.0",
+    "uuid": "^8.3.2"
+  }
+}
