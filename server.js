@@ -150,6 +150,34 @@ async function savePage(req, res, next) {
 
                 await databaseApi.updateUserProfile(req.session.userId, req.body.friendcode, req.body.version);
             }
+        } else if (checkApiKey(req)) {
+            if (req.body.userId) {
+                if (req.body.friendcode || req.body.version) {
+                    if (req.body.friendcode) {
+                        // validate friend code
+                        req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
+                        if (!req.body.friendcode.match(/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}$/)) {
+                            return res.send({
+                                result: "Invalid friend code"
+                            });
+                        }
+                    }
+    
+                    await databaseApi.updateUserProfile(req.body.userId, req.body.friendcode, req.body.version);
+    
+                    return res.send({
+                        result: "updated"
+                    });
+                }
+    
+                return res.send({
+                    result: "unable to update friend code"
+                });
+            } else {
+                return res.send({
+                    result: "missing userId param"
+                });
+            }
         }
     
         res.redirect("/?_v=" + new Date().valueOf(), 302);
@@ -176,6 +204,21 @@ app.post("/delete", deletePage);
 
 async function profilePage(req, res, next) {
     try {
+        if (checkApiKey(req)) {
+            if (req.params.userId) {
+                var userData = await databaseApi.getUserProfileByUserId(req.params.userId);
+
+                return res.send({
+                    friendCode: userData ? userData.friendCode : "",
+                    profileId: userData ? userData.id : ""
+                });
+            } else {
+                return res.send({
+                    result: "missing userId param"
+                });
+            }
+        }
+
         if (req.params.id.length !== 36)
             throw "Invalid ID";
 
@@ -209,7 +252,7 @@ async function profilePage(req, res, next) {
         next("Profile not found");
     }
 }
-app.get("/p/:id", profilePage);
+app.get("/p/:id?", profilePage);
 
 app.get('/logout', (req, res, next) => {
     try {
@@ -220,5 +263,11 @@ app.get('/logout', (req, res, next) => {
         next(e);
     }
 });
+
+function checkApiKey(req) {
+    const apikey = req.header(appSettings.apiKeyName);
+
+    return apiKey === appSettings.apiKeyValue;
+}
 
 server.listen(appSettings.http);
