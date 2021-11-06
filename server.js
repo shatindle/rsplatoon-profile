@@ -205,8 +205,8 @@ app.post("/delete", deletePage);
 async function profilePage(req, res, next) {
     try {
         if (checkApiKey(req)) {
-            if (req.params.userId) {
-                var userData = await databaseApi.getUserProfileByUserId(req.params.userId);
+            if (req.query.userId) {
+                var userData = await databaseApi.getUserProfileByUserId(req.query.userId);
 
                 return res.send({
                     friendCode: userData ? userData.friendCode : "",
@@ -252,7 +252,7 @@ async function profilePage(req, res, next) {
         next("Profile not found");
     }
 }
-app.get("/p/:id", profilePage);
+app.get("/p(/:id)?", profilePage);
 
 app.get('/logout', (req, res, next) => {
     try {
