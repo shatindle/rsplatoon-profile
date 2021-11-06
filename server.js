@@ -252,7 +252,7 @@ async function profilePage(req, res, next) {
         next("Profile not found");
     }
 }
-app.get("/p/:id?", profilePage);
+app.get("/p/:id", profilePage);
 
 app.get('/logout', (req, res, next) => {
     try {
