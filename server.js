@@ -267,7 +267,7 @@ app.get('/logout', (req, res, next) => {
 function checkApiKey(req) {
     const apikey = req.header(appSettings.apiKeyName);
 
-    return apiKey === appSettings.apiKeyValue;
+    return apikey === appSettings.apiKeyValue;
 }
 
 server.listen(appSettings.http);
