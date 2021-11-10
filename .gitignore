@@ -117,3 +117,5 @@ oauth_info.json
 script_oauth_info.json
 twitter.settings.json
 translate.json
+imgur.json
+deepai.json

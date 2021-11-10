@@ -73,8 +73,47 @@ function checkPostCache(item) {
     }
 }
 
-async function updateUserProfile(userId, friendCode, updateVersion) {
-    if (!friendCode && !updateVersion)
+function isEmpty(data) {
+    if (data) {
+        if (data.friendCode)
+            return false;
+        if (data.drip)
+            return false;
+        if (data.dripDeleteHash)
+            return false;
+        if (data.uploadAttempt)
+            return false;
+    }
+
+    return true;
+}
+
+function weekStart() {
+    var date = new Date();
+    return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
+}
+
+async function canUpload(userId) {
+    const userData = await getUserProfileByUserId(userId);
+
+    if (!userData.uploadAttempts)
+        return true;
+
+    if (userData.uploadAttempts.length < 3)
+        return true;
+
+    var current = weekStart();
+
+    for (var i = 0; i < userData.uploadAttempts.length; i++) {
+        if (userData.uploadAttempts[i] !== current)
+            return true;
+    }
+
+    return false;
+}
+
+async function updateUserProfile(userId, changes, updateVersion) {
+    if (isEmpty(changes) && !updateVersion)
         return;
 
     limit();
@@ -85,7 +124,10 @@ async function updateUserProfile(userId, friendCode, updateVersion) {
     if (!doc.exists) {
         await profileRef.set({
             userId: userId,
-            friendCode: friendCode,
+            friendCode: changes.friendCode,
+            drip: changes.drip,
+            dripDeleteHash: changes.dripDeleteHash,
+            uploadAttempts: [],
             createdOn: Firestore.Timestamp.now(),
             updatedOn: Firestore.Timestamp.now(),
             version: 1
@@ -101,7 +143,10 @@ async function updateUserProfile(userId, friendCode, updateVersion) {
 
         addToCache({
             userId: userId,
-            friendCode: friendCode,
+            friendCode: changes.friendCode,
+            drip: changes.drip,
+            dripDeleteHash: changes.dripDeleteHash,
+            uploadAttempts: [],
             version: 1,
             id: id
         }, postCache);
@@ -112,9 +157,31 @@ async function updateUserProfile(userId, friendCode, updateVersion) {
 
         var data = doc.data();
 
-        if (friendCode !== null) {
-            newData.friendCode = friendCode;
-            data.friendCode = friendCode;
+        if (changes.friendCode) {
+            newData.friendCode = changes.friendCode;
+            data.friendCode = changes.friendCode;
+        }
+
+        if (changes.drip) {
+            newData.drip = changes.drip;
+            data.drip = changes.drip;
+        }
+
+        if (changes.dripDeleteHash) {
+            newData.dripDeleteHash = changes.dripDeleteHash;
+            data.dripDeleteHash = changes.dripDeleteHash;
+        }
+
+        if (changes.uploadAttempt) {
+            if (!data.uploadAttempts)
+                data.uploadAttempts = [];
+
+            data.uploadAttempts.push(weekStart());
+
+            if (data.uploadAttempts.length > 3)
+                data.uploadAttempts.shift();
+
+            newData.uploadAttempts = data.uploadAttempts;
         }
 
         if (updateVersion) {
@@ -145,12 +212,18 @@ async function updateUserProfile(userId, friendCode, updateVersion) {
 
         if (inCacheValue) {
             inCacheValue.friendCode = data.friendCode;
+            inCacheValue.drip = data.drip;
+            inCacheValue.dripDeleteHash = data.dripDeleteHash;
+            inCacheValue.uploadAttempts = data.uploadAttempts;
             inCacheValue.version = data.version;
             inCacheValue.id = id;
         } else {
             addToCache({
                 userId: userId,
                 friendCode: data.friendCode,
+                drip: data.drip,
+                dripDeleteHash: data.dripDeleteHash,
+                uploadAttempts: data.uploadAttempts,
                 version: data.version,
                 id: id
             }, postCache);
@@ -232,5 +305,6 @@ module.exports = {
     updateUserProfile,
     getUserProfileById,
     getUserProfileByUserId,
-    removeUserProfile
+    removeUserProfile,
+    canUpload
 };
