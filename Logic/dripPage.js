@@ -25,7 +25,7 @@ async function getPage(req, res, next) {
         baseUrl: appSettings.baseUrl,
         loginUrl: appSettings.loginUrl, 
         friendCode: userData ? userData.friendCode : "",
-        drip: userData ? userData.drip : "",
+        drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
         blockupload: !await databaseApi.canUpload(req.session.userId),
         profileId: userData ? userData.id : ""
     });
@@ -44,19 +44,57 @@ async function postDrip(req, res, next) {
             return res.redirect('/');
 
         if (req.file) {
-            if (await databaseApi.canUpload(req.session.userId)) {
-                await databaseApi.updateUserProfile(req.session.userId, {
-                    uploadAttempt: true
-                });
+            var userData = await databaseApi.getUserProfileByUserId(req.session.userId);
 
-                const response = await imgApi.uploadImage(req.file.buffer);
+            var oldDripDeleteHash = null;
 
-                await databaseApi.updateUserProfile(req.session.userId, {
-                    drip: response.url,
-                    dripDeleteHash: response.deleteHash
-                });
-            }
+            if (userData && userData.dripDeleteHash && userData.dripDeleteHash !== "NONE")
+                oldDripDeleteHash = userData.dripDeleteHash;
+
+            const response = await imgApi.uploadImage(req.session.userId, req.file.buffer);
+
+            await databaseApi.updateUserProfile(req.session.userId, {
+                drip: response.url,
+                dripDeleteHash: response.deleteHash
+            });
+
+            if (oldDripDeleteHash)
+                await imgApi.deleteImage(oldDripDeleteHash);
         }
+    } catch (err) {
+        return res.send({
+            body: "error",
+            status: 500
+        });
+    }
+
+    res.redirect('/drip');
+}
+
+/**
+ * @description User be deleting drip
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {Function} next The next function to run if this one has nothing to do
+ */
+async function deleteDrip(req, res, next) {
+    try {
+        if (!req.session.userId)
+            return res.redirect('/');
+
+            var userData = await databaseApi.getUserProfileByUserId(req.session.userId);
+
+            if (userData && userData.dripDeleteHash) {
+                const response = await imgApi.deleteImage(userData.dripDeleteHash);
+
+                if (response.success)
+                    await databaseApi.updateUserProfile(req.session.userId, {
+                        drip: "NONE",
+                        dripDeleteHash: "NONE"
+                    });
+                else
+                    throw "Unable to delete drip";
+            }
     } catch (err) {
         return res.send({
             body: "error",
@@ -73,7 +111,8 @@ async function postDrip(req, res, next) {
  */
  function init(app) {
     app.get('/drip', getPage);
-    app.post('/drip', upload.single('drip'), postDrip);
+    app.post('/drip/save', upload.single('drip'), postDrip);
+    app.post('/drip/delete', upload.single('drip'), deleteDrip);
 }
 
 module.exports = {

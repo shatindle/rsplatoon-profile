@@ -62,7 +62,7 @@ async function rootPage(req, res, next) {
                 baseUrl: appSettings.baseUrl,
                 loginUrl: appSettings.loginUrl, 
                 friendCode: userData ? userData.friendCode : "",
-                drip: userData ? userData.drip : "",
+                drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                 profileId: userData ? userData.id : ""
             });
             return;
@@ -162,6 +162,7 @@ async function profilePage(req, res, next) {
 
                 return res.send({
                     friendCode: userData ? userData.friendCode : "",
+                    drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                     profileId: userData ? userData.id : ""
                 });
             } else {
@@ -195,6 +196,9 @@ async function profilePage(req, res, next) {
 
         if (userData) {
             responseData.friendCode = userData.friendCode;
+
+            if (userData.drip && userData.drip !== "NONE")
+                responseData.drip = userData.drip;
 
             res.render(path.join(__dirname, '/html/profile.html'), responseData);
             return;

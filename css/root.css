@@ -161,3 +161,13 @@ body {
     float: right;
     margin-top: 14px;
 }
+
+.drip-pic {
+    width: 100%;
+}
+
+.edit-drip {
+    position: absolute;
+    top: 3px;
+    right: 14px;
+}

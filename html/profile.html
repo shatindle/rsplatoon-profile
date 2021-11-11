@@ -59,28 +59,46 @@
 				</div>
             <% } %>
 		</div>
-		<div>
-            <form>
-				<label for="copy-input">Friend Code</label>
-				<div class="input-group" onclick="copyToClipboard()">
-					  <input type="text" class="form-control"
-						  value="<%= friendCode %>" id="copy-input" readonly>
-					  <span class="input-group-btn">
-						<button class="btn btn-default" type="button" id="copy-button"
-							data-toggle="tooltip" data-placement="button"
-							title="Copy to Clipboard">
-							  <i class="fa fa-copy"></i>
-						</button>
-					  </span>
+		<div class="container">
+			<div class="row" style="margin-bottom: 14px;">
+				<div class="col-12 col-md-6">
+					<% if (drip) { %>
+						<div>
+							<h3>Their drip</h3>
+						</div>
+						<img src="<%= drip %>" class="drip-pic" />
+					<% } else { %>
+						<div>
+							<h3>No drip</h3>
+						</div>
+						<img src="/css/img/nodrip.png" class="drip-pic" />
+					<% } %>
 				</div>
-				<script>
-					function copyToClipboard() {
-						$("#copy-input").focus();
-						$("#copy-input").select();
-						document.execCommand("copy");
-					}
-				</script>
-			</form>
+				<div class="col-12 col-md-6">
+					<form>
+						<h3 for="copy-input">Friend Code</h3>
+						<div class="input-group" onclick="copyToClipboard()">
+							  <input type="text" class="form-control"
+								  value="<%= friendCode %>" id="copy-input" readonly>
+							  <span class="input-group-btn">
+								<button class="btn btn-default" type="button" id="copy-button"
+									data-toggle="tooltip" data-placement="button"
+									title="Copy to Clipboard">
+									  <i class="fa fa-copy"></i>
+								</button>
+							  </span>
+						</div>
+						<script>
+							function copyToClipboard() {
+								$("#copy-input").focus();
+								$("#copy-input").select();
+								document.execCommand("copy");
+							}
+						</script>
+					</form>
+				</div>
+			</div>
+            
 			<% if (!id) { %>
                 <div class="nameentry needtologin">
                     <a id="loginDiscord" href="<%= loginUrl %>">

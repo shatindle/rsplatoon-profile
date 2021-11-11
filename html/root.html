@@ -61,36 +61,42 @@
 		</div>
 		<div>
             <% if (id) {%>
-				<% if (profileId) { %>
-					<form>
-						<label for="copy-input">Your Profile Link</label>
-						<div class="input-group" onclick="copyToClipboard()">
-						  	<input type="text" class="form-control"
-							  	value="<%= baseUrl %>/p/<%= profileId %>?_v=<%= new Date().valueOf() %>" id="copy-input" readonly>
-						  	<span class="input-group-btn">
-								<button class="btn btn-default" type="button" id="copy-button"
-									data-toggle="tooltip" data-placement="button"
-									title="Copy to Clipboard">
-							  		<i class="fa fa-copy"></i>
-								</button>
-						  	</span>
-						</div>
-						<script>
-							function copyToClipboard() {
-								console.log("going");
-								$("#copy-input").focus();
-								$("#copy-input").select();
-								document.execCommand("copy");
-							}
-						</script>
-					</form>
-				<% } %>
+				
 				<div class="container">
-					<div class="row">
+					<div class="row" style="margin-bottom: 14px;">
 						<div class="col">
+							<% if (profileId) { %>
+								<form>
+									<label for="copy-input">Your Profile Link</label>
+									<div class="input-group" onclick="copyToClipboard()">
+										  <input type="text" class="form-control"
+											  value="<%= baseUrl %>/p/<%= profileId %>?_v=<%= new Date().valueOf() %>" id="copy-input" readonly>
+										  <span class="input-group-btn">
+											<button class="btn btn-default" type="button" id="copy-button"
+												data-toggle="tooltip" data-placement="button"
+												title="Copy to Clipboard">
+												  <i class="fa fa-copy"></i>
+											</button>
+										  </span>
+									</div>
+									<script>
+										function copyToClipboard() {
+											console.log("going");
+											$("#copy-input").focus();
+											$("#copy-input").select();
+											document.execCommand("copy");
+										}
+									</script>
+								</form>
+							<% } %>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 col-md-6">
 							<% if (drip) { %>
 								<div>
 									<h3>Your drip</h3>
+									<a class="btn btn-primary edit-drip" href="/drip" role="button">Edit</a>
 								</div>
 								<img src="<%= drip %>" class="drip-pic" />
 							<% } else { %>
@@ -100,10 +106,10 @@
 								<img src="/css/img/nodrip.png" class="drip-pic" />
 							<% } %>
 						</div>
-						<div class="col">
+						<div class="col-12 col-md-6">
 							<form action="/save" method="post">
 								<div class="form-group">
-									<label for="friendcode">Friend Code</label>
+									<h3 for="friendcode">Friend Code</h3>
 									<input type="text" class="form-control" name="friendcode" value="<%= friendCode %>" data-original="<%= friendCode %>" id="friendcode" placeholder="0000-0000-0000" required />
 									<div class="invalid-feedback">
 										Friend code invalid format.
