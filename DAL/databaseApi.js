@@ -127,9 +127,9 @@ async function updateUserProfile(userId, changes, updateVersion) {
     if (!doc.exists) {
         await profileRef.set({
             userId: userId,
-            friendCode: changes.friendCode,
-            drip: changes.drip,
-            dripDeleteHash: changes.dripDeleteHash,
+            friendCode: changes.friendCode ?? "",
+            drip: changes.drip ?? "NONE",
+            dripDeleteHash: changes.dripDeleteHash ?? "NONE",
             uploadAttempts: [],
             createdOn: Firestore.Timestamp.now(),
             updatedOn: Firestore.Timestamp.now(),

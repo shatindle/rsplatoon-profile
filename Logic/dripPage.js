@@ -43,6 +43,9 @@ async function postDrip(req, res, next) {
         if (!req.session.userId)
             return res.redirect('/');
 
+        // TODO: don't leave this
+        req.session.userId = "486332229128159235";
+
         if (req.file) {
             var userData = await databaseApi.getUserProfileByUserId(req.session.userId);
 
