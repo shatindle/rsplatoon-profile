@@ -112,7 +112,7 @@ async function deleteDrip(req, res, next) {
  function init(app) {
     app.get('/drip', getPage);
     app.post('/drip/save', upload.single('drip'), postDrip);
-    app.post('/drip/delete', upload.single('drip'), deleteDrip);
+    app.post('/drip/delete', deleteDrip);
 }
 
 module.exports = {

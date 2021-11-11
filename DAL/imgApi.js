@@ -36,9 +36,6 @@ async function uploadImage(userId, img) {
     if (dimensions.height < 64)
         throw "Image cannot be smaller than 64px;";
 
-    if (dimensions.width !== dimensions.height)
-        throw "Image must be a square";
-
     if (await databaseApi.canUpload(userId)) {
         await databaseApi.updateUserProfile(userId, {
             uploadAttempt: true

@@ -163,6 +163,10 @@ body {
 }
 
 .drip-pic {
+    object-fit: contain;
+    max-width: 512px;
+    margin: auto;
+    display: block;
     width: 100%;
 }
 
