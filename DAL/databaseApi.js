@@ -96,7 +96,7 @@ function weekStart() {
 async function canUpload(userId) {
     const userData = await getUserProfileByUserId(userId);
 
-    if (userData.uploadAttempts && userData.uploadAttempts.length) {
+    if (userData && userData.uploadAttempts && userData.uploadAttempts.length) {
         if (userData.uploadAttempts.length < 3)
             return true;
 
@@ -105,7 +105,7 @@ async function canUpload(userId) {
         for (var i = 0; i < userData.uploadAttempts.length; i++) {
             if (userData.uploadAttempts[i] !== current)
                 return true;
-    }
+        }
     } else {
         return true;
     }
