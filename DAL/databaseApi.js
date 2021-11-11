@@ -96,18 +96,21 @@ function weekStart() {
 async function canUpload(userId) {
     const userData = await getUserProfileByUserId(userId);
 
-    if (!userData.uploadAttempts)
-        return true;
-
-    if (userData.uploadAttempts.length < 3)
-        return true;
-
-    var current = weekStart();
-
-    for (var i = 0; i < userData.uploadAttempts.length; i++) {
-        if (userData.uploadAttempts[i] !== current)
+    if (userData.uploadAttempts && userData.uploadAttempts.length) {
+        if (userData.uploadAttempts.length < 3)
             return true;
+
+        var current = weekStart();
+
+        for (var i = 0; i < userData.uploadAttempts.length; i++) {
+            if (userData.uploadAttempts[i] !== current)
+                return true;
     }
+    } else {
+        return true;
+    }
+
+    
 
     return false;
 }
