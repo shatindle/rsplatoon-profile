@@ -69,7 +69,7 @@
 							</div>
 							<div class="drip-img">
 								<img src="<%= drip %>" class="drip-pic" />
-								<form action="/drip/delete" method="post">
+								<form action="/drip/delete" method="post" class="delete-drip">
 									<button type="submit" value="submit">
 										<i class="bi bi-x"></i>
 									</button>
@@ -88,8 +88,9 @@
 							<div>Each user is allowed 3 uploads per week. The limit has been exceeded.</div>
 						<% } else { %>
 						<form id="imageupload" enctype="multipart/form-data" method="post" action="/drip/save">
+							<h3>Upload New Drip</h3>
 							<input name="drip" type="file" accept=".jpg,.png,image/jpeg,image/png" />
-							<input type="submit" value="Update Drip" />
+							<input type="submit" value="Update Drip" class="btn btn-primary" />
 						</form>
 						<% } %>
 					</div>
