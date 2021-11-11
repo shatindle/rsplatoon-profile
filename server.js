@@ -1,9 +1,5 @@
 const express = require('express');
 const path = require('path');
-const url = require('url');
-const fetch = require('node-fetch');
-const discordApi = require("./DAL/discordApi");
-const discordCredentials = require("./discord.json");
 const databaseApi = require("./DAL/databaseApi");
 const appSettings = require("./settings.json");
 const cookieParser = require('cookie-parser');
@@ -49,60 +45,10 @@ app.use((err, req, res, next) => {
     console.log(`I'm the error handler. '${err.message}'`);
     res.status(500);
     res.json({ error: "Invalid argument" });
-  });
+});
 
-async function discordLoginPage (req, res, next) {
-    try {
-        const urlObj = url.parse(req.url, true);
-
-        if (urlObj.query.code) {
-            const accessCode = urlObj.query.code;
-            const data = {
-                client_id: discordCredentials.client_id,
-                client_secret: discordCredentials.client_secret,
-                grant_type: 'authorization_code',
-                redirect_uri: discordCredentials.redirect_uri,
-                code: accessCode,
-                scope: 'identify',
-            };
-
-            var response = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                body: new URLSearchParams(data),
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            });
-
-            var info = await response.json();
-
-            var userInfoRequest = await fetch('https://discord.com/api/users/@me', {
-                headers: {
-                    authorization: `${info.token_type} ${info.access_token}`,
-                },
-            });    
-
-            var userData = await userInfoRequest.json();
-
-            req.session.userId = userData.id;
-            req.session.username = userData.username + "#" + userData.discriminator;
-            req.session.createdon = userData.id;
-
-            if (userData.avatar) {
-                req.session.avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}`;
-            } else {
-                req.session.avatar = `/css/img/discord.png`;
-            }
-
-            // databaseApi.recordLogin(userData.id);
-        }
-
-        res.redirect('/');
-    } catch (e) {
-        next("Error logging in");
-    }
-}
-app.get('/discordlogin', discordLoginPage);
+require("./Logic/discordLoginPage").init(app);
+require("./Logic/dripPage").init(app);
 
 async function rootPage(req, res, next) {
     try {
@@ -116,6 +62,7 @@ async function rootPage(req, res, next) {
                 baseUrl: appSettings.baseUrl,
                 loginUrl: appSettings.loginUrl, 
                 friendCode: userData ? userData.friendCode : "",
+                drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                 profileId: userData ? userData.id : ""
             });
             return;
@@ -128,6 +75,7 @@ async function rootPage(req, res, next) {
             baseUrl: appSettings.baseUrl,
             loginUrl: appSettings.loginUrl,
             friendCode: "",
+            drip: "",
             profileId: ""
         });
     } catch (e) {
@@ -148,7 +96,9 @@ async function savePage(req, res, next) {
                     }
                 }
 
-                await databaseApi.updateUserProfile(req.session.userId, req.body.friendcode, req.body.version);
+                await databaseApi.updateUserProfile(req.session.userId, {
+                    friendCode: req.body.friendcode
+                }, req.body.version);
             }
         } else if (checkApiKey(req)) {
             if (req.body.userId) {
@@ -163,7 +113,9 @@ async function savePage(req, res, next) {
                         }
                     }
     
-                    await databaseApi.updateUserProfile(req.body.userId, req.body.friendcode, req.body.version);
+                    await databaseApi.updateUserProfile(req.body.userId, {
+                        friendCode: req.body.friendcode
+                    }, req.body.version);
     
                     return res.send({
                         result: "updated"
@@ -210,6 +162,7 @@ async function profilePage(req, res, next) {
 
                 return res.send({
                     friendCode: userData ? userData.friendCode : "",
+                    drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                     profileId: userData ? userData.id : ""
                 });
             } else {
@@ -229,6 +182,7 @@ async function profilePage(req, res, next) {
             baseUrl: appSettings.baseUrl,
             loginUrl: appSettings.loginUrl,
             friendCode: "",
+            drip: "", 
             profileId: req.params.id
         }
 
@@ -242,6 +196,9 @@ async function profilePage(req, res, next) {
 
         if (userData) {
             responseData.friendCode = userData.friendCode;
+
+            if (userData.drip && userData.drip !== "NONE")
+                responseData.drip = userData.drip;
 
             res.render(path.join(__dirname, '/html/profile.html'), responseData);
             return;

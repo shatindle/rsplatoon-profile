@@ -5,7 +5,7 @@
 	<title>r/Splatoon Profile</title>
 	<meta http-equiv="Content-Security-Policy" content="default-src * gap: data: blob: 'unsafe-inline' 'unsafe-eval' ws: wss:;">
 
-	<meta name="description" content="Friend code: <%= friendCode %>">
+	<meta name="description" content="r/Splatoon profile pages - share your friend code and game stats!">
 	<meta name="keywords" content="Splatoon, r/Splatoon, friend code, profile">
 	<meta name="author" content="shane#1353">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +30,7 @@
 				<a href="https://discord.gg/rsplatoon" target="_blank">
 					<img class="center-block" src="/css/img/logo.png" style="width:300px;height:auto;margin-top:0"/>
 				</a>
-				<h1>Profile</h1>
+				<h1>Manage Drip</h1>
 			</div>
             <% if (id) { %>
 				<div id="userinfo">
@@ -59,53 +59,42 @@
 				</div>
             <% } %>
 		</div>
-		<div class="container">
-			<div class="row" style="margin-bottom: 14px;">
-				<div class="col-12 col-md-6">
-					<% if (drip) { %>
-						<div>
-							<h3>Their drip</h3>
-						</div>
-						<img src="<%= drip %>" class="drip-pic" />
-					<% } else { %>
-						<div>
-							<h3>No drip</h3>
-						</div>
-						<img src="/css/img/nodrip.png" class="drip-pic" />
-					<% } %>
-				</div>
-				<div class="col-12 col-md-6">
-					<form>
-						<h3 for="copy-input">Friend Code</h3>
-						<div class="input-group" onclick="copyToClipboard()">
-							  <input type="text" class="form-control"
-								  value="<%= friendCode %>" id="copy-input" readonly>
-							  <span class="input-group-btn">
-								<button class="btn btn-default" type="button" id="copy-button"
-									data-toggle="tooltip" data-placement="button"
-									title="Copy to Clipboard">
-									  <i class="fa fa-copy"></i>
-								</button>
-							  </span>
-						</div>
-						<script>
-							function copyToClipboard() {
-								$("#copy-input").focus();
-								$("#copy-input").select();
-								document.execCommand("copy");
-							}
-						</script>
-					</form>
+		<div>
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<% if (drip) { %>
+							<div>
+								<h3>Your drip</h3>
+							</div>
+							<div class="drip-img">
+								<img src="<%= drip %>" class="drip-pic" />
+								<form action="/drip/delete" method="post">
+									<button type="submit" value="submit">
+										<i class="bi bi-x"></i>
+									</button>
+								</form>
+							</div>
+						<% } else { %>
+							<div>
+								<h3>No drip</h3>
+							</div>
+							<img src="/css/img/nodrip.png" class="drip-pic" />
+						<% } %>
+					</div>
+					<div class="col">
+						<% if (blockupload) { %>
+							<h2>Upload limit exceeded</h2>
+							<div>Each user is allowed 3 uploads per week. The limit has been exceeded.</div>
+						<% } else { %>
+						<form id="imageupload" enctype="multipart/form-data" method="post" action="/drip/save">
+							<input name="drip" type="file" accept=".jpg,.png,image/jpeg,image/png" />
+							<input type="submit" value="Update Drip" />
+						</form>
+						<% } %>
+					</div>
 				</div>
 			</div>
-            
-			<% if (!id) { %>
-                <div class="nameentry needtologin">
-                    <a id="loginDiscord" href="<%= loginUrl %>">
-                        <button class="btn btn-primary" type="button">Discord Login</button>
-                    </a>
-                </div>
-			<% } %>
 		</div>
 	</div>
 </body>
