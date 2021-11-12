@@ -25,6 +25,7 @@ async function getPage(req, res, next) {
         baseUrl: appSettings.baseUrl,
         loginUrl: appSettings.loginUrl, 
         friendCode: userData ? userData.friendCode : "",
+        name: userData && userData.name ? userData.name : "User",
         drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
         blockupload: !await databaseApi.canUpload(req.session.userId),
         profileId: userData ? userData.id : ""

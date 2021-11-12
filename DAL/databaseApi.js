@@ -128,6 +128,7 @@ async function updateUserProfile(userId, changes, updateVersion) {
         await profileRef.set({
             userId: userId,
             friendCode: changes.friendCode ?? "",
+            name: changes.name ?? "",
             drip: changes.drip ?? "NONE",
             dripDeleteHash: changes.dripDeleteHash ?? "NONE",
             uploadAttempts: [],
@@ -147,6 +148,7 @@ async function updateUserProfile(userId, changes, updateVersion) {
         addToCache({
             userId: userId,
             friendCode: changes.friendCode,
+            name: changes.name,
             drip: changes.drip,
             dripDeleteHash: changes.dripDeleteHash,
             uploadAttempts: [],
@@ -163,6 +165,11 @@ async function updateUserProfile(userId, changes, updateVersion) {
         if (changes.friendCode) {
             newData.friendCode = changes.friendCode;
             data.friendCode = changes.friendCode;
+        }
+
+        if (changes.name) {
+            newData.name = changes.name;
+            data.name = changes.name;
         }
 
         if (changes.drip) {
@@ -215,6 +222,7 @@ async function updateUserProfile(userId, changes, updateVersion) {
 
         if (inCacheValue) {
             inCacheValue.friendCode = data.friendCode;
+            inCacheValue.name = data.name;
             inCacheValue.drip = data.drip;
             inCacheValue.dripDeleteHash = data.dripDeleteHash;
             inCacheValue.uploadAttempts = data.uploadAttempts;
@@ -224,6 +232,7 @@ async function updateUserProfile(userId, changes, updateVersion) {
             addToCache({
                 userId: userId,
                 friendCode: data.friendCode,
+                name: data.name,
                 drip: data.drip,
                 dripDeleteHash: data.dripDeleteHash,
                 uploadAttempts: data.uploadAttempts,

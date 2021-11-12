@@ -3,7 +3,6 @@ const path = require('path');
 const databaseApi = require("./DAL/databaseApi");
 const appSettings = require("./settings.json");
 const cookieParser = require('cookie-parser');
-const { profile } = require('console');
 
 const sessionParser = require('express-session')({
     cookie: {
@@ -62,6 +61,7 @@ async function rootPage(req, res, next) {
                 baseUrl: appSettings.baseUrl,
                 loginUrl: appSettings.loginUrl, 
                 friendCode: userData ? userData.friendCode : "",
+                name: userData && userData.name ? userData.name : "",
                 drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                 profileId: userData ? userData.id : ""
             });
@@ -75,6 +75,7 @@ async function rootPage(req, res, next) {
             baseUrl: appSettings.baseUrl,
             loginUrl: appSettings.loginUrl,
             friendCode: "",
+            name: "",
             drip: "",
             profileId: ""
         });
@@ -87,7 +88,7 @@ app.get('/', rootPage);
 async function savePage(req, res, next) {
     try {
         if (req.session.userId) {
-            if (req.body.friendcode || req.body.version) {
+            if (req.body.friendcode || req.body.name || req.body.version) {
                 if (req.body.friendcode) {
                     // validate friend code
                     req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
@@ -96,13 +97,18 @@ async function savePage(req, res, next) {
                     }
                 }
 
+                if (req.body.name && req.body.name.length > 10) {
+                    req.body.name = req.body.name.substring(0, 10);
+                }
+
                 await databaseApi.updateUserProfile(req.session.userId, {
-                    friendCode: req.body.friendcode
+                    friendCode: req.body.friendcode,
+                    name: req.body.name
                 }, req.body.version);
             }
         } else if (checkApiKey(req)) {
             if (req.body.userId) {
-                if (req.body.friendcode || req.body.version) {
+                if (req.body.friendcode || req.body.name || req.body.version) {
                     if (req.body.friendcode) {
                         // validate friend code
                         req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
@@ -112,9 +118,14 @@ async function savePage(req, res, next) {
                             });
                         }
                     }
+
+                    if (req.body.name && req.body.name.length > 10) {
+                        req.body.name = req.body.name.substring(0, 10);
+                    }
     
                     await databaseApi.updateUserProfile(req.body.userId, {
-                        friendCode: req.body.friendcode
+                        friendCode: req.body.friendcode,
+                        name: req.body.name
                     }, req.body.version);
     
                     return res.send({
@@ -162,6 +173,7 @@ async function profilePage(req, res, next) {
 
                 return res.send({
                     friendCode: userData ? userData.friendCode : "",
+                    name: userData && userData.name ? userData.name : "User",
                     drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
                     profileId: userData ? userData.id : ""
                 });
@@ -182,6 +194,7 @@ async function profilePage(req, res, next) {
             baseUrl: appSettings.baseUrl,
             loginUrl: appSettings.loginUrl,
             friendCode: "",
+            name: "",
             drip: "", 
             profileId: req.params.id
         }
@@ -196,6 +209,8 @@ async function profilePage(req, res, next) {
 
         if (userData) {
             responseData.friendCode = userData.friendCode;
+
+            responseData.name = userData.name;
 
             if (userData.drip && userData.drip !== "NONE")
                 responseData.drip = userData.drip;

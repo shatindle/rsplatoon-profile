@@ -110,11 +110,12 @@
 						<div class="col-12 col-md-6">
 							<form action="/save" method="post">
 								<div class="form-group">
+									<h3 for="name">Username</h3>
+									<input type="text" class="form-control" name="name" value="<%= name %>" data-sendable="true" data-original="<%= name %>" id="name" placeholder="In game name" maxlength="10" />
+									
 									<h3 for="friendcode">Friend Code</h3>
-									<input type="text" class="form-control" name="friendcode" value="<%= friendCode %>" data-original="<%= friendCode %>" id="friendcode" placeholder="0000-0000-0000" required />
-									<div class="invalid-feedback">
-										Friend code invalid format.
-									</div>
+									<input type="text" class="form-control" name="friendcode" value="<%= friendCode %>" data-sendable="true" data-original="<%= friendCode %>" id="friendcode" placeholder="0000-0000-0000" />
+									
 									<button id="submit" type="submit" class="btn btn-primary" disabled>Save</button>
 									<script>
 										$(document).ready(function() {
@@ -137,15 +138,47 @@
 		
 													$(this).val(final);
 		
-													if (final !== $(this).data("original") && final.length === 14)
-														$("#submit").prop("disabled", false);
-													else 
+													if (final !== $(this).data("original") && final.length === 14) {
+														$(this).data("sendable", true);
+														if (allGood())
+															$("#submit").prop("disabled", false);
+														else
+															$("#submit").prop("disabled", true);
+													} else {
+														$(this).data("sendable", false);
 														$("#submit").prop("disabled", true);
+													}
+												} else {
+													$(this).data("sendable", false);
+													$("#submit").prop("disabled", true);
+												}
+											});
+											$("#name").bind("input propertychange", function() {
+												var final = $(this).val();
+												if (final) {
+													if (final !== $(this).data("original") && final.length <= 10) {
+														$(this).data("sendable", true);
+														if (allGood())
+															$("#submit").prop("disabled", false);
+													} else {
+														$("#submit").prop("disabled", true);
+													}
 												} else {
 													$("#submit").prop("disabled", true);
 												}
 											});
-										})
+
+											function allGood() {
+												var all = $("[data-sendable]");
+
+												for (var i = 0; i < all.length; i++) {
+													if (!$(all[i]).data("sendable"))
+														return false;
+												}
+
+												return true;
+											}
+										});
 									</script>
 								</div>
 							</form>

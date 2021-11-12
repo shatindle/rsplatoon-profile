@@ -9,6 +9,20 @@
 	<meta name="keywords" content="Splatoon, r/Splatoon, friend code, profile">
 	<meta name="author" content="shane#1353">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta property="og:title" content="r/Splatoon Profile: <%= (name) ? name : 'User' %>">
+	<meta property="og:description" content="Friend code: <%= friendCode %>">
+	<meta property="og:image" content="<%= drip %>">
+	<meta property="og:url" content="https://profile.rsplatoon.com/p/<%= profileId %>">
+
+	<meta name="twitter:title" content="r/Splatoon Profile: <%= (name) ? name : 'User' %>">
+	<meta name="twitter:description" content="Friend code: <%= friendCode %>">
+	<meta name="twitter:image" content="<%= drip %>">
+	<meta name="twitter:card" content="summary_large_image">
+
+	<meta property="og:site_name" content="r/Splatoon Profile">
+	<meta name="twitter:image:alt" content="User Drip Pic">
+
 	<link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
@@ -60,6 +74,11 @@
             <% } %>
 		</div>
 		<div class="container">
+			<div class="row" style="margin-bottom: 14px;">
+				<div class="col">
+					<h3><%= (name) ? name : 'User' %>'s Profile</h3>
+				</div>
+			</div>
 			<div class="row" style="margin-bottom: 14px;">
 				<div class="col-12 col-md-6">
 					<% if (drip) { %>
