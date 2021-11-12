@@ -12,12 +12,12 @@
 
 	<meta property="og:title" content="r/Splatoon Profile: <%= (name) ? name : 'User' %>">
 	<meta property="og:description" content="Friend code: <%= friendCode %>">
-	<meta property="og:image" content="<%= drip %>">
+	<meta property="og:image" content="<%= (drip) ? drip : 'https://profile.rsplatoon.com/css/img/nodrip.png' %>">
 	<meta property="og:url" content="https://profile.rsplatoon.com/p/<%= profileId %>">
 
 	<meta name="twitter:title" content="r/Splatoon Profile: <%= (name) ? name : 'User' %>">
 	<meta name="twitter:description" content="Friend code: <%= friendCode %>">
-	<meta name="twitter:image" content="<%= drip %>">
+	<meta name="twitter:image" content="<%= (drip) ? drip : 'https://profile.rsplatoon.com/css/img/nodrip.png' %>">
 	<meta name="twitter:card" content="summary_large_image">
 
 	<meta property="og:site_name" content="r/Splatoon Profile">
