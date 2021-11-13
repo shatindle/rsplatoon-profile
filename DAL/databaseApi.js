@@ -126,9 +126,6 @@ async function updateUserProfile(userId, changes, updateVersion) {
         return;
 
     limit();
-
-    if (!canUpdate(userId))
-        throw "Limit exceeded";
         
     var profileRef = await db.collection("profiles").doc(userId);
     var doc = await profileRef.get();
