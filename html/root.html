@@ -108,7 +108,7 @@
 							<% } %>
 						</div>
 						<div class="col-12 col-md-6">
-							<form action="/save" method="post">
+							<form action="/save" method="post" id="save-form">
 								<div class="form-group">
 									<h3 for="name">Username</h3>
 									<input type="text" class="form-control" name="name" value="<%= name %>" data-sendable="true" data-original="<%= name %>" id="name" placeholder="In game name" maxlength="10" />
@@ -116,6 +116,84 @@
 									<h3 for="friendcode">Friend Code</h3>
 									<input type="text" class="form-control" name="friendcode" value="<%= friendCode %>" data-sendable="true" data-original="<%= friendCode %>" id="friendcode" placeholder="0000-0000-0000" />
 									
+									<div class="">
+										<div class="row">
+											<div class="col">
+												
+												<h3 for="template">Card Template</h3>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-12 col-md-6">
+												<select class="form-control" name="template" data-original="<%= template %>" data-sendable="true">
+													<option value="s3-yellow-indigo" <%= (template === 's3-yellow-indigo') ? 'selected' : '' %>>Splatoon 3 Blue on Yellow</option>
+													<option value="s3-indigo-yellow" <%= (template === 's3-indigo-yellow') ? 'selected' : '' %>>Splatoon 3 Blue on Yellow</option>
+													<option value="s2-pink-green" <%= (template === 's2-pink-green') ? 'selected' : '' %>>Splatoon 2 Pink on Green</option>
+													<option value="s2-green-pink" <%= (template === 's2-green-pink') ? 'selected' : '' %>>Splatoon 3 Green on Pink</option>
+													<option value="s1-orange-blue" <%= (template === 's1-orange-blue') ? 'selected' : '' %>>Splatoon 3 Orange on Blue</option>
+													<option value="s1-blue-orange" <%= (template === 's1-blue-orange') ? 'selected' : '' %>>Splatoon 3 Blue on Orange</option>
+													<option value="s2-toni-kensa" <%= (template === 's2-toni-kensa') ? 'selected' : '' %>>Toni Kensa Black on White</option>
+													<option value="s2-toni-kensa-inverted" <%= (template === 's2-toni-kensa-inverted') ? 'selected' : '' %>>Toni Kensa White on Black</option>
+												</select>
+											</div>
+											<div class="col-12 col-md-6">
+												<img src="" style="width:100%;" id="templateimage" />
+											</div>
+											<script>
+												$(document).ready(function() {
+													$("select[name=template]").change(function() {
+														var final = $(this).val();
+
+														var image;
+
+														switch (final) {
+															case "s2-toni-kensa-inverted":
+																image = "/css/img/canvas_s2_toni_kensa_inverted.png";
+																break;
+															case "s2-toni-kensa":
+																image = "/css/img/canvas_s2_toni_kensa.png";
+																break;
+															case "s1-blue-orange":
+																image = "/css/img/canvas_s1_blue_orange.png";
+																break;
+															case "s1-orange-blue":
+																image = "/css/img/canvas_s1_orange_blue.png";
+																break;
+															case "s2-pink-green":
+																image = "/css/img/canvas_s2_pink_green.png";
+																break;
+															case "s2-green-pink":
+																image = "/css/img/canvas_s2_green_pink.png";
+																break;
+															case "s3-indigo-yellow":
+																image = "/css/img/canvas_s3_indigo_yellow.png";
+																break;
+															case "s3-yellow-indigo":
+															default:
+																image = "/css/img/canvas_s3_yellow_indigo.png";
+																break;
+														}
+
+														$("#templateimage").attr("src", image);
+
+														if (final !== $(this).data("original")) {
+															$(this).data("sendable", true);
+															if (allGood())
+																$("#submit").prop("disabled", false);
+															else
+																$("#submit").prop("disabled", true);
+														} else {
+															$(this).data("sendable", false);
+															$("#submit").prop("disabled", true);
+														}
+													});
+
+													$("select[name=template]").change();
+												})
+											</script>
+										</div>
+									</div>
+
 									<button id="submit" type="submit" class="btn btn-primary" disabled>Save</button>
 									<script>
 										$(document).ready(function() {
@@ -168,7 +246,11 @@
 												}
 											});
 
-											function allGood() {
+											$("#save-form").on("submit", function() {
+												$("#submit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>  Loading...');
+											});
+										});
+										function allGood() {
 												var all = $("[data-sendable]");
 
 												for (var i = 0; i < all.length; i++) {
@@ -178,7 +260,6 @@
 
 												return true;
 											}
-										});
 									</script>
 								</div>
 							</form>

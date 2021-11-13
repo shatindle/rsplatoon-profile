@@ -18,7 +18,14 @@ const uploader = new ImgurAnonymousUploader(imgurSettings.clientid);
  * @param {Buffer} img Image to try to upload to imgur
  * @returns The link and delete hash if successful
  */
-async function uploadImage(userId, img) {
+async function createDrip(userId, img) {
+    var userData = await databaseApi.getUserProfileByUserId(userId);
+
+    var oldDripDeleteHash = null;
+
+    if (userData && userData.dripDeleteHash && userData.dripDeleteHash !== "NONE")
+        oldDripDeleteHash = userData.dripDeleteHash;
+
     const dimensions = sizeOf(img);
 
     if (!dimensions)
@@ -36,7 +43,7 @@ async function uploadImage(userId, img) {
     if (dimensions.height < 64)
         throw "Image cannot be smaller than 64px;";
 
-    if (await databaseApi.canUpload(userId)) {
+    if (await databaseApi.canUpdate(userId)) {
         await databaseApi.updateUserProfile(userId, {
             uploadAttempt: true
         });
@@ -49,6 +56,14 @@ async function uploadImage(userId, img) {
             throw "Possible NSFW content: " + resp.output.nsfw_score;
     
         const response = await uploader.uploadBuffer(img);
+
+        await databaseApi.updateUserProfile(userId, {
+            drip: response.url,
+            dripDeleteHash: response.deleteHash
+        });
+
+        if (oldDripDeleteHash)
+            await imgApi.deleteImage(oldDripDeleteHash);
     
         return {
             url: response.url,
@@ -58,6 +73,35 @@ async function uploadImage(userId, img) {
         // user cannot upload an image right now
         throw "UPLOAD LIMIT EXCEEDED";
     }
+}
+
+/**
+ * @description Try to upload an image to imgur.  This data has already been checked
+ * @param {Buffer} img Image to try to upload to imgur
+ * @returns The link and delete hash if successful
+ */
+async function uploadCard(userId, img) {
+    const userData = await databaseApi.getUserProfileByUserId(userId);
+
+    var oldCardDeleteHash = null;
+
+    if (userData && userData.cardDeleteHash && userData.cardDeleteHash !== "NONE")
+        oldCardDeleteHash = userData.cardDeleteHash;
+        
+    const response = await uploader.uploadBuffer(img);
+
+    await databaseApi.updateUserProfile(userId, {
+        card: response.url,
+        cardDeleteHash: response.deleteHash
+    });
+
+    if (oldCardDeleteHash)
+        await deleteImage(oldCardDeleteHash);
+
+    return {
+        url: response.url,
+        deleteHash: response.deleteHash
+    };
 }
 
 /**
@@ -75,6 +119,7 @@ async function deleteImage(hash) {
 }
 
 module.exports = {
-    uploadImage,
-    deleteImage
+    createDrip,
+    deleteImage,
+    uploadCard
 };

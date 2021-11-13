@@ -3,6 +3,12 @@ const path = require('path');
 const databaseApi = require("./DAL/databaseApi");
 const appSettings = require("./settings.json");
 const cookieParser = require('cookie-parser');
+const cardApi = require("./DAL/cardApi");
+const imgApi = require("./DAL/imgApi");
+const fetch = require("node-fetch");
+const util = require("util");
+const { response } = require('express');
+const readFile = util.promisify(require("fs").readFile);
 
 const sessionParser = require('express-session')({
     cookie: {
@@ -63,6 +69,8 @@ async function rootPage(req, res, next) {
                 friendCode: userData ? userData.friendCode : "",
                 name: userData && userData.name ? userData.name : "",
                 drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
+                template: userData && userData.template ? userData.template : "",
+                // card is not available on this page
                 profileId: userData ? userData.id : ""
             });
             return;
@@ -88,7 +96,10 @@ app.get('/', rootPage);
 async function savePage(req, res, next) {
     try {
         if (req.session.userId) {
-            if (req.body.friendcode || req.body.name || req.body.version) {
+            if (!await databaseApi.canUpdate(req.session.userId))
+                throw "Update limit has been reached for this user";
+
+            if (req.body.friendcode || req.body.name || req.body.template || req.body.version) {
                 if (req.body.friendcode) {
                     // validate friend code
                     req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
@@ -103,12 +114,31 @@ async function savePage(req, res, next) {
 
                 await databaseApi.updateUserProfile(req.session.userId, {
                     friendCode: req.body.friendcode,
-                    name: req.body.name
+                    name: req.body.name,
+                    template: req.body.template
                 }, req.body.version);
+
+                var userData = await databaseApi.getUserProfileByUserId(req.session.userId);
+
+                var dripBuffer;
+
+                if (userData.drip && userData.drip !== "NONE") {
+                    const response = await fetch(userData.drip);
+                    dripBuffer = Buffer.from(await response.arrayBuffer());
+                } else {
+                    dripBuffer = await readFile(path.join(__dirname, "css/img/nodrip.png"));
+                }
+
+                // update user card
+                const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+                await imgApi.uploadCard(req.session.userId, cardBuffer);
             }
         } else if (checkApiKey(req)) {
             if (req.body.userId) {
-                if (req.body.friendcode || req.body.name || req.body.version) {
+                if (!await databaseApi.canUpdate(req.body.userId))
+                    throw "Update limit has been reached for this user";
+
+                if (req.body.friendcode || req.body.name || req.body.template || req.body.version) {
                     if (req.body.friendcode) {
                         // validate friend code
                         req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
@@ -125,8 +155,24 @@ async function savePage(req, res, next) {
     
                     await databaseApi.updateUserProfile(req.body.userId, {
                         friendCode: req.body.friendcode,
-                        name: req.body.name
+                        name: req.body.name,
+                        template: req.body.template
                     }, req.body.version);
+
+                    var userData = await databaseApi.getUserProfileByUserId(req.body.userId);
+
+                    var dripBuffer;
+
+                    if (userData.drip && userData.drip !== "NONE") {
+                        const response = await fetch(userData.drip);
+                        dripBuffer = Buffer.from(await response.arrayBuffer());
+                    } else {
+                        dripBuffer = await readFile(path.join(__dirname, "css/img/nodrip.png"));
+                    }
+
+                    // update user card
+                    const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+                    await imgApi.uploadCard(req.body.userId, cardBuffer);
     
                     return res.send({
                         result: "updated"
@@ -171,10 +217,29 @@ async function profilePage(req, res, next) {
             if (req.query.userId) {
                 var userData = await databaseApi.getUserProfileByUserId(req.query.userId);
 
+                if (userData) {
+                    // do they have a card?  If not, make one!
+                    if (!userData.card || userData.card === "NONE") {
+                        var dripBuffer;
+
+                        if (userData.drip && userData.drip !== "NONE") {
+                            const response = await fetch(userData.drip);
+                            dripBuffer = Buffer.from(await response.arrayBuffer());
+                        } else {
+                            dripBuffer = await readFile(path.join(__dirname, "css/img/nodrip.png"));
+                        }
+
+                        // update user card
+                        const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+                        await imgApi.uploadCard(req.query.userId, cardBuffer);
+                    }
+                }
+
                 return res.send({
                     friendCode: userData ? userData.friendCode : "",
                     name: userData && userData.name ? userData.name : "User",
                     drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
+                    card: userData && userData.card && userData.card !== "NONE" ? userData.card : "",
                     profileId: userData ? userData.id : ""
                 });
             } else {
@@ -196,6 +261,7 @@ async function profilePage(req, res, next) {
             friendCode: "",
             name: "",
             drip: "", 
+            card: "",
             profileId: req.params.id
         }
 
@@ -214,6 +280,24 @@ async function profilePage(req, res, next) {
 
             if (userData.drip && userData.drip !== "NONE")
                 responseData.drip = userData.drip;
+            
+            // do they have a card?  If not, make one!
+            if (!userData.card || userData.card === "NONE") {
+                var dripBuffer;
+
+                if (userData.drip && userData.drip !== "NONE") {
+                    const response = await fetch(userData.drip);
+                    dripBuffer = Buffer.from(await response.arrayBuffer());
+                } else {
+                    dripBuffer = await readFile(path.join(__dirname, "css/img/nodrip.png"));
+                }
+
+                // update user card
+                const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+                await imgApi.uploadCard(userData.userId, cardBuffer);
+            }
+
+            responseData.card = userData.card;
 
             res.render(path.join(__dirname, '/html/profile.html'), responseData);
             return;

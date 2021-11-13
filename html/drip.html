@@ -157,6 +157,8 @@
 									var data = new FormData();
 									data.append('drip', resizedImage);
 
+									$("#upload-new-image").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>  Loading...');
+
 									$.ajax({
 										url: "/drip/save",
 										data: data,

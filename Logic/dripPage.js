@@ -5,6 +5,7 @@ const imgApi = require("../DAL/imgApi");
 const multer  = require('multer');
 const upload = multer({ storage: multer.memoryStorage({}) });
 const databaseApi = require("../DAL/databaseApi");
+const cardApi = require("../DAL/cardApi");
 
 /**
  * @description Get the drip page for managing your drip
@@ -27,7 +28,7 @@ async function getPage(req, res, next) {
         friendCode: userData ? userData.friendCode : "",
         name: userData && userData.name ? userData.name : "User",
         drip: userData && userData.drip && userData.drip !== "NONE" ? userData.drip : "",
-        blockupload: !await databaseApi.canUpload(req.session.userId),
+        blockupload: !await databaseApi.canUpdate(req.session.userId),
         profileId: userData ? userData.id : ""
     });
     return;
@@ -45,22 +46,13 @@ async function postDrip(req, res, next) {
             return res.redirect('/');
 
         if (req.file) {
-            var userData = await databaseApi.getUserProfileByUserId(req.session.userId);
+            await imgApi.createDrip(req.session.userId, req.file.buffer);
 
-            var oldDripDeleteHash = null;
+            const userData = await databaseApi.getUserProfileByUserId(req.session.userId);
 
-            if (userData && userData.dripDeleteHash && userData.dripDeleteHash !== "NONE")
-                oldDripDeleteHash = userData.dripDeleteHash;
-
-            const response = await imgApi.uploadImage(req.session.userId, req.file.buffer);
-
-            await databaseApi.updateUserProfile(req.session.userId, {
-                drip: response.url,
-                dripDeleteHash: response.deleteHash
-            });
-
-            if (oldDripDeleteHash)
-                await imgApi.deleteImage(oldDripDeleteHash);
+            // update user card
+            const cardBuffer = await cardApi.createCard(req.file.buffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+            await imgApi.uploadCard(req.session.userId, cardBuffer);
         }
     } catch (err) {
         return res.send({

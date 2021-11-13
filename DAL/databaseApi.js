@@ -81,6 +81,12 @@ function isEmpty(data) {
             return false;
         if (data.dripDeleteHash)
             return false;
+        if (data.template)
+            return false;
+        if (data.card)
+            return false;
+        if (data.cardDeleteHash)
+            return false;
         if (data.uploadAttempt)
             return false;
     }
@@ -93,24 +99,24 @@ function weekStart() {
     return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
 }
 
-async function canUpload(userId) {
+const UPDATE_LIMIT = 20;
+
+async function canUpdate(userId) {
     const userData = await getUserProfileByUserId(userId);
 
-    if (userData && userData.uploadAttempts && userData.uploadAttempts.length) {
-        if (userData.uploadAttempts.length < 3)
+    if (userData && userData.recentUpdates && userData.recentUpdates.length) {
+        if (userData.recentUpdates.length < UPDATE_LIMIT)
             return true;
 
         var current = weekStart();
 
-        for (var i = 0; i < userData.uploadAttempts.length; i++) {
-            if (userData.uploadAttempts[i] !== current)
+        for (var i = 0; i < userData.recentUpdates.length; i++) {
+            if (userData.recentUpdates[i] !== current)
                 return true;
         }
     } else {
         return true;
     }
-
-    
 
     return false;
 }
@@ -120,6 +126,9 @@ async function updateUserProfile(userId, changes, updateVersion) {
         return;
 
     limit();
+
+    if (canUpdate(userId))
+        
 
     var profileRef = await db.collection("profiles").doc(userId);
     var doc = await profileRef.get();
@@ -131,7 +140,10 @@ async function updateUserProfile(userId, changes, updateVersion) {
             name: changes.name ?? "",
             drip: changes.drip ?? "NONE",
             dripDeleteHash: changes.dripDeleteHash ?? "NONE",
-            uploadAttempts: [],
+            template: changes.template ?? "s3-yellow-indigo",
+            card: changes.card ?? "NONE",
+            cardDeleteHash: changes.cardDeleteHash ?? "NONE",
+            recentUpdates: [],
             createdOn: Firestore.Timestamp.now(),
             updatedOn: Firestore.Timestamp.now(),
             version: 1
@@ -151,7 +163,10 @@ async function updateUserProfile(userId, changes, updateVersion) {
             name: changes.name,
             drip: changes.drip,
             dripDeleteHash: changes.dripDeleteHash,
-            uploadAttempts: [],
+            template: changes.template,
+            card: changes.card,
+            cardDeleteHash: changes.cardDeleteHash,
+            recentUpdates: [],
             version: 1,
             id: id
         }, postCache);
@@ -162,36 +177,48 @@ async function updateUserProfile(userId, changes, updateVersion) {
 
         var data = doc.data();
 
+        var countIt = false;
+
         if (changes.friendCode) {
             newData.friendCode = changes.friendCode;
             data.friendCode = changes.friendCode;
+            countIt = true;
         }
 
         if (changes.name) {
             newData.name = changes.name;
             data.name = changes.name;
+            countIt = true;
         }
 
         if (changes.drip) {
+            // this will be managed by upload attempt
             newData.drip = changes.drip;
             data.drip = changes.drip;
         }
 
         if (changes.dripDeleteHash) {
+            // this will be managed by upload attempt
             newData.dripDeleteHash = changes.dripDeleteHash;
             data.dripDeleteHash = changes.dripDeleteHash;
         }
 
-        if (changes.uploadAttempt) {
-            if (!data.uploadAttempts)
-                data.uploadAttempts = [];
+        if (changes.template) {
+            newData.template = changes.template;
+            data.template = changes.template;
+            countIt = true;
+        }
 
-            data.uploadAttempts.push(weekStart());
+        if (changes.card) {
+            // this will be managed by upload attempt
+            newData.card = changes.card;
+            data.card = changes.card;
+        }
 
-            if (data.uploadAttempts.length > 3)
-                data.uploadAttempts.shift();
-
-            newData.uploadAttempts = data.uploadAttempts;
+        if (changes.cardDeleteHash) {
+            // this will be managed by upload attempt
+            newData.cardDeleteHash = changes.cardDeleteHash;
+            data.cardDeleteHash = changes.cardDeleteHash;
         }
 
         if (updateVersion) {
@@ -204,6 +231,20 @@ async function updateUserProfile(userId, changes, updateVersion) {
             if (idOldDoc.exists) {
                 await idOldDoc.delete();
             }
+
+            countIt = true;
+        }
+
+        if (changes.uploadAttempt || countIt) {
+            if (!data.recentUpdates)
+                data.recentUpdates = [];
+
+            data.recentUpdates.push(weekStart());
+
+            if (data.recentUpdates.length > UPDATE_LIMIT)
+                data.recentUpdates.shift();
+
+            newData.recentUpdates = data.recentUpdates;
         }
 
         newData.updatedOn = Firestore.Timestamp.now();
@@ -225,7 +266,10 @@ async function updateUserProfile(userId, changes, updateVersion) {
             inCacheValue.name = data.name;
             inCacheValue.drip = data.drip;
             inCacheValue.dripDeleteHash = data.dripDeleteHash;
-            inCacheValue.uploadAttempts = data.uploadAttempts;
+            inCacheValue.template = data.template;
+            inCacheValue.card = data.card;
+            inCacheValue.cardDeleteHash = data.cardDeleteHash;
+            inCacheValue.recentUpdates = data.recentUpdates;
             inCacheValue.version = data.version;
             inCacheValue.id = id;
         } else {
@@ -235,7 +279,10 @@ async function updateUserProfile(userId, changes, updateVersion) {
                 name: data.name,
                 drip: data.drip,
                 dripDeleteHash: data.dripDeleteHash,
-                uploadAttempts: data.uploadAttempts,
+                template: data.template,
+                card: data.card,
+                cardDeleteHash: data.cardDeleteHash,
+                recentUpdates: data.recentUpdates,
                 version: data.version,
                 id: id
             }, postCache);
@@ -318,5 +365,5 @@ module.exports = {
     getUserProfileById,
     getUserProfileByUserId,
     removeUserProfile,
-    canUpload
+    canUpdate
 };
