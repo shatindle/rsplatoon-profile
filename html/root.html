@@ -182,9 +182,6 @@
 																$("#submit").prop("disabled", false);
 															else
 																$("#submit").prop("disabled", true);
-														} else {
-															$(this).data("sendable", false);
-															$("#submit").prop("disabled", true);
 														}
 													});
 
@@ -216,7 +213,7 @@
 		
 													$(this).val(final);
 		
-													if (final !== $(this).data("original") && final.length === 14) {
+													if (final.length === 14) {
 														$(this).data("sendable", true);
 														if (allGood())
 															$("#submit").prop("disabled", false);
@@ -234,12 +231,10 @@
 											$("#name").bind("input propertychange", function() {
 												var final = $(this).val();
 												if (final) {
-													if (final !== $(this).data("original") && final.length <= 10) {
+													if (final.length <= 10) {
 														$(this).data("sendable", true);
 														if (allGood())
 															$("#submit").prop("disabled", false);
-													} else {
-														$("#submit").prop("disabled", true);
 													}
 												} else {
 													$("#submit").prop("disabled", true);
