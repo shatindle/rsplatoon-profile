@@ -19,8 +19,8 @@ async function createCard(img, templateName, friendCode, name) {
 
     // add the user image to the canvas
     const userImage = await loadImage(img);
-    const leftEdge = (userImage.width - 512) / 2;
-    const topEdge = (userImage.height - 512) / 2;
+    const leftEdge = (512 - userImage.width) / 2;
+    const topEdge = (512 - userImage.height) / 2;
     ctx.drawImage(userImage, 72 + leftEdge, 59 + topEdge);
 
     // prepare the text
