@@ -41,6 +41,14 @@ async function createCard(img, templateName, friendCode, name) {
 
 function getTemplate(templateName) {
     switch (templateName) {
+        case "s2-black-firefin":
+            return path.join(__dirname, "../css/img/canvas_s2_black_firefin.png");
+        case "s2-sanitized-pink": 
+            return path.join(__dirname, "../css/img/canvas_s2_sanitized_pink.png");
+        case "s3-callie":
+            return path.join(__dirname, "../css/img/canvas_s3_callie.png");
+        case "user-black-gold":
+            return path.join(__dirname, "../css/img/canvas_user_black_gold.png");
         case "s2-toni-kensa-inverted":
             return path.join(__dirname, "../css/img/canvas_s2_toni_kensa_inverted.png");
         case "s2-toni-kensa":
@@ -70,8 +78,12 @@ function getFriendCodeColor(templateName) {
         case "s2-pink-green":
         case "s2-green-pink":
         case "s3-indigo-yellow":
+        case "s2-sanitized-pink":
+        case "s3-callie":
             return 'rgba(0,0,0,1)';
         case "s2-toni-kensa-inverted":
+        case "user-black-gold":
+        case "s2-black-firefin":
         default:
             return 'rgba(255,255,255,1)';
     }
@@ -84,10 +96,14 @@ function getNameColor(templateName) {
         case "s2-pink-green":
         case "s2-green-pink":
         case "s3-indigo-yellow":
+        case "user-black-gold":
+        case "s2-black-firefin":
             return 'rgba(0,0,0,1)';
         case "s2-toni-kensa":
         case "s1-orange-blue":
         case "s3-yellow-indigo":
+        case "s3-callie":
+        case "s2-sanitized-pink":
         default:
             return 'rgba(255,255,255,1)';
     }

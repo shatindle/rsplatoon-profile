@@ -128,12 +128,16 @@
 												<select class="form-control" name="template" data-original="<%= template %>" data-sendable="true">
 													<option value="s3-yellow-indigo" <%= (template === 's3-yellow-indigo') ? 'selected' : '' %>>Splatoon 3 Blue on Yellow</option>
 													<option value="s3-indigo-yellow" <%= (template === 's3-indigo-yellow') ? 'selected' : '' %>>Splatoon 3 Yellow on Blue</option>
+													<option value="s3-callie" <%= (template === 's3-callie') ? 'selected' : '' %>>Splatoon 3 Callie</option>
 													<option value="s2-pink-green" <%= (template === 's2-pink-green') ? 'selected' : '' %>>Splatoon 2 Green on Pink</option>
 													<option value="s2-green-pink" <%= (template === 's2-green-pink') ? 'selected' : '' %>>Splatoon 2 Pink on Green</option>
+													<option value="s2-black-firefin" <%= (template === 's2-black-firefin') ? 'selected' : '' %>>Splatoon 2 Firefin on Black</option>
+													<option value="s2-sanitized-pink" <%= (template === 's2-sanitized-pink') ? 'selected' : '' %>>Splatoon 2 Pink on Sanitized</option>
 													<option value="s1-orange-blue" <%= (template === 's1-orange-blue') ? 'selected' : '' %>>Splatoon 1 Blue on Orange</option>
 													<option value="s1-blue-orange" <%= (template === 's1-blue-orange') ? 'selected' : '' %>>Splatoon 1 Orange on Blue</option>
 													<option value="s2-toni-kensa" <%= (template === 's2-toni-kensa') ? 'selected' : '' %>>Toni Kensa White on Black</option>
 													<option value="s2-toni-kensa-inverted" <%= (template === 's2-toni-kensa-inverted') ? 'selected' : '' %>>Toni Kensa Black on White</option>
+													<option value="user-black-gold" <%= (template === 'user-black-gold') ? 'selected' : '' %>>Custom Gold on Black</option>
 												</select>
 											</div>
 											<div class="col-12 col-md-6">
@@ -147,6 +151,9 @@
 														var image;
 
 														switch (final) {
+															case "s2-black-firefin":
+																image = "/css/img/canvas_s2_black_firefin.png";
+																break;
 															case "s2-toni-kensa-inverted":
 																image = "/css/img/canvas_s2_toni_kensa_inverted.png";
 																break;
@@ -167,6 +174,15 @@
 																break;
 															case "s3-indigo-yellow":
 																image = "/css/img/canvas_s3_indigo_yellow.png";
+																break;
+															case "user-black-gold":
+																image = "/css/img/canvas_user_black_gold.png";
+																break;
+															case "s3-callie":
+																image = "/css/img/canvas_s3_callie.png";
+																break;
+															case "s2-sanitized-pink":
+																image = "/css/img/canvas_s2_sanitized_pink.png";
 																break;
 															case "s3-yellow-indigo":
 															default:
