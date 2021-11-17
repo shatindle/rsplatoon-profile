@@ -41,6 +41,18 @@ async function createCard(img, templateName, friendCode, name) {
 
 function getTemplate(templateName) {
     switch (templateName) {
+        case "s2-chaos-order":
+            return path.join(__dirname, "../css/img/canvas_s2_chaos_order.png");
+        case "s2-order-chaos":
+            return path.join(__dirname, "../css/img/canvas_s2_order_chaos.png");
+        case "s2-octavio":
+            return path.join(__dirname, "../css/img/canvas_s2_octavio.png");
+        case "s3-agent3":
+            return path.join(__dirname, "../css/img/canvas_s3_agent3.png");
+        case "s3-marie":
+            return path.join(__dirname, "../css/img/canvas_s3_marie.png");
+        case "user-coffee-squid":
+            return path.join(__dirname, "../css/img/canvas_user_coffee_squid.png");
         case "s2-black-firefin":
             return path.join(__dirname, "../css/img/canvas_s2_black_firefin.png");
         case "s2-sanitized-pink": 
@@ -71,6 +83,8 @@ function getTemplate(templateName) {
 
 function getFriendCodeColor(templateName) {
     switch (templateName) {
+        case "user-coffee-squid":
+            return 'rgba(104,56,24,1)';
         case "s2-toni-kensa":
         case "s1-orange-blue":
         case "s3-yellow-indigo":
@@ -80,6 +94,11 @@ function getFriendCodeColor(templateName) {
         case "s3-indigo-yellow":
         case "s2-sanitized-pink":
         case "s3-callie":
+        case "s2-order-chaos":
+        case "s2-chaos-order":
+        case "s2-octavio":
+        case "s3-agent3":
+        case "s3-marie":
             return 'rgba(0,0,0,1)';
         case "s2-toni-kensa-inverted":
         case "user-black-gold":
@@ -91,6 +110,8 @@ function getFriendCodeColor(templateName) {
 
 function getNameColor(templateName) {
     switch (templateName) {
+        case "user-coffee-squid":
+            return 'rgba(244,237,225,1)';
         case "s2-toni-kensa-inverted":
         case "s1-blue-orange":
         case "s2-pink-green":
@@ -98,12 +119,17 @@ function getNameColor(templateName) {
         case "s3-indigo-yellow":
         case "user-black-gold":
         case "s2-black-firefin":
+        case "s2-chaos-order":
+        case "s2-order-chaos":
             return 'rgba(0,0,0,1)';
         case "s2-toni-kensa":
         case "s1-orange-blue":
         case "s3-yellow-indigo":
         case "s3-callie":
         case "s2-sanitized-pink":
+        case "s2-octavio":
+        case "s3-agent3":
+        case "s3-marie":
         default:
             return 'rgba(255,255,255,1)';
     }

@@ -129,15 +129,23 @@
 													<option value="s3-yellow-indigo" <%= (template === 's3-yellow-indigo') ? 'selected' : '' %>>Splatoon 3 Blue on Yellow</option>
 													<option value="s3-indigo-yellow" <%= (template === 's3-indigo-yellow') ? 'selected' : '' %>>Splatoon 3 Yellow on Blue</option>
 													<option value="s3-callie" <%= (template === 's3-callie') ? 'selected' : '' %>>Splatoon 3 Callie</option>
+													<option value="s3-agent3" <%= (template === 's3-agent3') ? 'selected' : '' %>>Splatoon 3 Agent 3</option>
+													<option value="s3-marie" <%= (template === 's3-marie') ? 'selected' : '' %>>Splatoon 3 Marie</option>
 													<option value="s2-pink-green" <%= (template === 's2-pink-green') ? 'selected' : '' %>>Splatoon 2 Green on Pink</option>
 													<option value="s2-green-pink" <%= (template === 's2-green-pink') ? 'selected' : '' %>>Splatoon 2 Pink on Green</option>
 													<option value="s2-black-firefin" <%= (template === 's2-black-firefin') ? 'selected' : '' %>>Splatoon 2 Firefin on Black</option>
 													<option value="s2-sanitized-pink" <%= (template === 's2-sanitized-pink') ? 'selected' : '' %>>Splatoon 2 Pink on Sanitized</option>
+
+													<option value="s2-chaos-order" <%= (template === 's2-chaos-order') ? 'selected' : '' %>>Splatoon 2 Order on Chaos</option>
+													<option value="s2-order-chaos" <%= (template === 's2-order-chaos') ? 'selected' : '' %>>Splatoon 2 Chaos on Order</option>
+													<option value="s2-octavio" <%= (template === 's2-octavio') ? 'selected' : '' %>>Splatoon 2 Octavio</option>
+
 													<option value="s1-orange-blue" <%= (template === 's1-orange-blue') ? 'selected' : '' %>>Splatoon 1 Blue on Orange</option>
 													<option value="s1-blue-orange" <%= (template === 's1-blue-orange') ? 'selected' : '' %>>Splatoon 1 Orange on Blue</option>
 													<option value="s2-toni-kensa" <%= (template === 's2-toni-kensa') ? 'selected' : '' %>>Toni Kensa White on Black</option>
 													<option value="s2-toni-kensa-inverted" <%= (template === 's2-toni-kensa-inverted') ? 'selected' : '' %>>Toni Kensa Black on White</option>
 													<option value="user-black-gold" <%= (template === 'user-black-gold') ? 'selected' : '' %>>Custom Gold on Black</option>
+													<option value="user-coffee-squid" <%= (template === 'user-coffee-squid') ? 'selected' : '' %>>Custom Coffee Squid</option>
 												</select>
 											</div>
 											<div class="col-12 col-md-6">
@@ -151,6 +159,24 @@
 														var image;
 
 														switch (final) {
+															case "s3-agent3":
+																image = "/css/img/canvas_s3_agent3.png";
+																break;
+															case "s3-marie":
+																image = "/css/img/canvas_s3_marie.png";
+																break;
+															case "s2-chaos-order":
+																image = "/css/img/canvas_s2_chaos_order.png";
+																break;
+															case "s2-order-chaos": 
+																image = "/css/img/canvas_s2_order_chaos.png";
+																break;
+															case "s2-octavio":
+																image = "/css/img/canvas_s2_octavio.png";
+																break;
+															case "user-coffee-squid": 
+																image = "/css/img/canvas_user_coffee_squid.png";
+																break;
 															case "s2-black-firefin":
 																image = "/css/img/canvas_s2_black_firefin.png";
 																break;
