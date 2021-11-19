@@ -7,23 +7,9 @@ const cardApi = require("./DAL/cardApi");
 const imgApi = require("./DAL/imgApi");
 const fetch = require("node-fetch");
 const util = require("util");
-const { response } = require('express');
 const readFile = util.promisify(require("fs").readFile);
+const { login, logout } = require("./Logic/login");
 
-const sessionParser = require('express-session')({
-    cookie: {
-        path: '/', 
-        secure: appSettings.secureCookie, 
-        httpOnly: true,
-        maxAge: 40 * 24 * 60 * 60 * 1000 // 40 days
-    },
-    proxy: appSettings.secureCookie && !appSettings.secure,
-    secret: appSettings.secret,
-    resave: false,
-    saveUninitialized: true,
-    name: 'rs-token.sid',
-    key: 'session_cookie_name',
-});
 
 const app = express();
 
@@ -35,8 +21,6 @@ if (!appSettings.secure && appSettings.secureCookie) {
 
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
-
-app.use(sessionParser);
 
 app.use('/js', express.static(__dirname + '/js'));
 app.use('/css', express.static(__dirname + '/css'));
@@ -50,6 +34,13 @@ app.use((err, req, res, next) => {
     console.log(`I'm the error handler. '${err.message}'`);
     res.status(500);
     res.json({ error: "Invalid argument" });
+});
+
+// check the "session" now that we're on jwt tokens
+app.use((req, res, next) => {
+    req.session = {};
+    login(req, res);
+    next();
 });
 
 require("./Logic/discordLoginPage").init(app);
@@ -312,7 +303,7 @@ app.get("/p(/:id)?", profilePage);
 
 app.get('/logout', (req, res, next) => {
     try {
-        req.session.destroy();
+        logout(res);
 
         res.render(path.join(__dirname, '/html/logout.html'));
     } catch (e) {

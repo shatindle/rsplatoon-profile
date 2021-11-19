@@ -2,6 +2,7 @@ const express = require('express');
 const url = require('url');
 const fetch = require('node-fetch');
 const discordCredentials = require("../discord.json");
+const login = require("./login");
 
 /**
  * @description Login to Discord callback
@@ -42,17 +43,13 @@ async function discordLoginPage (req, res, next) {
 
             var userData = await userInfoRequest.json();
 
-            req.session.userId = userData.id;
-            req.session.username = userData.username + "#" + userData.discriminator;
-            req.session.createdon = userData.id;
-
-            if (userData.avatar) {
-                req.session.avatar = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}`;
-            } else {
-                req.session.avatar = `/css/img/discord.png`;
-            }
-
-            // databaseApi.recordLogin(userData.id);
+            login.startSession(
+                req,
+                res, 
+                userData.id,
+                userData.username + "#" + userData.discriminator,
+                userData.id,
+                userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}` : `/css/img/discord.png`);
         }
 
         res.redirect('/');
