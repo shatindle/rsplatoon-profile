@@ -65,9 +65,8 @@ async function postDrip(req, res, next) {
             await imgApi.uploadCard(req.session.userId, cardBuffer);
         }
     } catch (err) {
-        return res.send({
-            body: "error",
-            status: 500
+        return res.status(500).send({
+            body: "error"
         });
     }
 
