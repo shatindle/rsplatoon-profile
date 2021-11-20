@@ -8,7 +8,7 @@ const imgApi = require("./DAL/imgApi");
 const fetch = require("node-fetch");
 const util = require("util");
 const readFile = util.promisify(require("fs").readFile);
-const { login, logout } = require("./Logic/login");
+const { login, logout, hasApiKey, hasUserCookie, botTokenLogin } = require("./Logic/login");
 
 
 const app = express();
@@ -37,14 +37,20 @@ app.use((err, req, res, next) => {
 });
 
 // check the "session" now that we're on jwt tokens
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     req.session = {};
-    login(req, res);
+
+    if (hasUserCookie(req))
+        login(req, res);
+    else if (hasApiKey(req))
+        await botTokenLogin(req, res);
+
     next();
 });
 
 require("./Logic/discordLoginPage").init(app);
 require("./Logic/dripPage").init(app);
+require("./Logic/settingsPage").init(app);
 
 async function rootPage(req, res, next) {
     try {
@@ -124,12 +130,16 @@ async function savePage(req, res, next) {
                 const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
                 await imgApi.uploadCard(req.session.userId, cardBuffer);
             }
-        } else if (checkApiKey(req)) {
+        } else if (req.session.isBot) {
             if (req.body.userId) {
                 if (!await databaseApi.canUpdate(req.body.userId))
                     throw "Update limit has been reached for this user";
 
-                if (req.body.friendcode || req.body.name || req.body.template || req.body.version) {
+                if (
+                    (req.body.friendcode && req.session.saveFriendCode) || 
+                    (req.body.name && req.session.saveUsername) || 
+                    (req.body.template && req.session.saveDrip)
+                ) {
                     if (req.body.friendcode) {
                         // validate friend code
                         req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
@@ -145,10 +155,10 @@ async function savePage(req, res, next) {
                     }
     
                     await databaseApi.updateUserProfile(req.body.userId, {
-                        friendCode: req.body.friendcode,
-                        name: req.body.name,
-                        template: req.body.template
-                    }, req.body.version);
+                        friendCode: req.session.saveFriendCode ? req.body.friendcode : null,
+                        name: req.session.saveUsername ? req.body.name : null,
+                        template: req.session.saveDrip ? req.body.template : null
+                    }, false);
 
                     var userData = await databaseApi.getUserProfileByUserId(req.body.userId);
 
@@ -204,7 +214,7 @@ app.post("/delete", deletePage);
 
 async function profilePage(req, res, next) {
     try {
-        if (checkApiKey(req)) {
+        if (req.session.isBot && req.session.getProfile) {
             if (req.query.userId) {
                 var userData = await databaseApi.getUserProfileByUserId(req.query.userId);
 
@@ -310,11 +320,5 @@ app.get('/logout', (req, res, next) => {
         next(e);
     }
 });
-
-function checkApiKey(req) {
-    const apikey = req.header(appSettings.apiKeyName);
-
-    return apikey === appSettings.apiKeyValue;
-}
 
 server.listen(appSettings.http);

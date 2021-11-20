@@ -37,6 +37,11 @@
 					<div class="usermenu" style="display: none;">
 						<div style="height:70px;width:1px;"></div>
 						<div class="item">
+							<a href="/settings">
+								Settings
+							</a>
+						</div>
+						<div class="item">
 							<form action="/delete" method="post">
 								<input type="hidden" name="delete" value="YES" />
 								<a href="#" onclick="$(this).closest('form').submit();return false;">
@@ -58,6 +63,7 @@
 					</script>
 				</div>
             <% } %>
+			<a class="btn btn-primary" href="/" role="button">Home</a>
 		</div>
 		<div>
 			<div class="container">
