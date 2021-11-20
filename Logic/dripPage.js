@@ -6,6 +6,7 @@ const multer  = require('multer');
 const upload = multer({ storage: multer.memoryStorage({}) });
 const databaseApi = require("../DAL/databaseApi");
 const cardApi = require("../DAL/cardApi");
+const fetch = require("node-fetch");
 
 /**
  * @description Get the drip page for managing your drip
@@ -50,8 +51,17 @@ async function postDrip(req, res, next) {
 
             const userData = await databaseApi.getUserProfileByUserId(req.session.userId);
 
+            var dripBuffer;
+
+            if (userData.drip && userData.drip !== "NONE") {
+                const response = await fetch(userData.drip);
+                dripBuffer = Buffer.from(await response.arrayBuffer());
+            } else {
+                dripBuffer = await readFile(path.join(__dirname, "../css/img/nodrip.png"));
+            }
+
             // update user card
-            const cardBuffer = await cardApi.createCard(req.file.buffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
+            const cardBuffer = await cardApi.createCard(dripBuffer, userData.template ?? "s3-yellow-indigo", userData.friendCode ?? "0000-0000-0000", userData.name ?? "User");
             await imgApi.uploadCard(req.session.userId, cardBuffer);
         }
     } catch (err) {

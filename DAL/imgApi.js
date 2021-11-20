@@ -63,7 +63,7 @@ async function createDrip(userId, img) {
         });
 
         if (oldDripDeleteHash)
-            await imgApi.deleteImage(oldDripDeleteHash);
+            await deleteImage(oldDripDeleteHash);
     
         return {
             url: response.url,
