@@ -595,6 +595,92 @@ async function saveBot(userId, changes, updateVersion) {
     }
 }
 
+async function getTournamentTeam(userId) {
+    // var inCacheValue = checkCache({ userId: userId }, userCache);
+
+    // if (inCacheValue)
+    //     return inCacheValue;
+
+    limit();
+
+    var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
+    var docs = await ref.get();
+
+    if (docs && docs.size === 1) {
+        var data;
+
+        docs.forEach(element => data = 
+            element.data());
+
+        // addToCache(data, userCache);
+
+        return data;
+    } else {
+        return null;
+    }
+}
+
+async function saveTournamentTeam(userId, team, captain, name) {
+    var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
+    var docs = await ref.get();
+
+    if (docs && docs.size === 0) {
+        // TODO: verify the data is good
+
+        await db.collection("tournamentteams").add({
+            team,
+            captain,
+            name,
+            createdOn: Firestore.Timestamp.now(),
+            updatedOn: Firestore.Timestamp.now()
+        });
+        
+        return;
+    } else {
+        if (docs.size !== 1)
+            throw "Multiple team matches found";
+
+        var newData = {};
+
+        var data = doc.data();
+
+        if (Array.isArray(team)) {
+            // TODO: verify the data is good
+            data.team = team;
+            newData.team = team;
+        }
+
+        if (captain) {
+            // TODO: verify the data is good
+            data.captain = captain;
+            newData.captain = captain;
+        }
+
+        if (name) {
+            // TODO: verify the data is good
+            data.name = name;
+            newData.name = name;
+        }
+
+        newData.updatedOn = Firestore.Timestamp.now();
+
+        docs.forEach(async element => {
+            await element.ref.set(newData, { merge: true });
+        });
+
+        return;
+    }
+}
+
+async function deleteTournamentTeam(userId) {
+    var ref = await db.collection("tournamentteams").where('members', 'array-contains', userId);
+    var docs = await ref.get();
+
+    docs.forEach(async element => {
+        await element.ref.delete();
+    });
+}
+
 module.exports = {
     updateUserProfile,
     getUserProfileById,
@@ -604,5 +690,8 @@ module.exports = {
     getBot,
     saveBot,
     getUserBotByUserId,
-    getAllBots
+    getAllBots,
+
+    getTournamentTeam,
+    saveTournamentTeam
 };
