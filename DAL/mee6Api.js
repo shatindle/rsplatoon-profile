@@ -59,15 +59,19 @@ async function cacheUserList(serverId) {
 async function searchUserList(serverId, search) {
     search = search.toUpperCase();
 
-    const users = userListByServer[serverId].filter(member => ("" + member.username + "#" + member.discriminator).toUpperCase().indexOf(search) > -1);
+    if (userListByServer[serverId]) {
+        const users = userListByServer[serverId].filter(member => ("" + member.username + "#" + member.discriminator).toUpperCase().indexOf(search) > -1);
 
-    return users.map(member => {
-        return {
-            id: member.id,
-            name: member.username + "#" + member.discriminator,
-            avatar: `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}`
-        };
-    }).slice(0, 5);
+        return users.map(member => {
+            return {
+                id: member.id,
+                name: member.username + "#" + member.discriminator,
+                avatar: `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}`
+            };
+        }).slice(0, 5);
+    } else {
+        return [];
+    }
 }
 
 module.exports = {
