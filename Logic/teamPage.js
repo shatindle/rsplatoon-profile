@@ -101,9 +101,10 @@ async function lookupUser(req, res, next) {
         result = [];
     }
 
-    if (result.length !== 1)
+    if (result.length !== 1) {
         result = [];
-    else {
+        res.send(result);
+    } else {
         // verify the user is not on a team yet
         if (await databaseApi.validateTournamentUser(result[0].id)) {
             res.send(result);
