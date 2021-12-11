@@ -52,7 +52,7 @@ var refresh = {
 
 async function findUserByName(search) {
     try {
-        if (!refresh.last || Date.now().valueOf() - refresh.last > 1000 * 60 * 5) {
+        if (!refresh.last || Date.now().valueOf() - refresh.last > 1000 * 60 * 60 * 12) {
             refresh.last = Date.now().valueOf();
             await cacheGuildList();
         }
