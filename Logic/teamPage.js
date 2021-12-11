@@ -76,23 +76,29 @@ async function lookupUser(req, res, next) {
 
     var result;
 
-    if (user === "unknown") {
-        result = await discordApi.findUserByName(req.query.search);
-
-        if (result.length === 0) {
-            // search other user repos
-            if (appSettings.otherServers && appSettings.otherServers.length) {
-                for (var i = 0; i < appSettings.otherServers.length; i++) {
-                    var otherServer = appSettings.otherServers[i];
-                    result = await mee6Api.searchUserList(otherServer, req.query.search);
-
-                    if (result && result.length > 0) 
-                        break;
+    try {
+        if (user === "unknown") {
+            result = await discordApi.findUserByName(req.query.search);
+    
+            if (result.length === 0) {
+                // search other user repos
+                if (appSettings.otherServers && appSettings.otherServers.length) {
+                    for (var i = 0; i < appSettings.otherServers.length; i++) {
+                        var otherServer = appSettings.otherServers[i];
+                        result = await mee6Api.searchUserList(otherServer, req.query.search);
+    
+                        if (result && result.length > 0) 
+                            break;
+                    }
                 }
             }
+        } else {
+            result = [user];
         }
-    } else {
-        result = [user];
+    } catch (err) {
+        console.log("ERROR: " + err);
+
+        result = [];
     }
 
     if (result.length !== 1)
