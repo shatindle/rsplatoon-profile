@@ -14,6 +14,10 @@ async function teamPage(req, res, next) {
     if (!req.session.userId)
         return res.redirect('/');
 
+    await basePage(req, res, next);
+}
+
+async function basePage(req, res, next) {
     const userData = await databaseApi.getUserProfileByUserId(req.session.userId);
 
     const tournamentTeam = await databaseApi.getTournamentTeam(req.session.userId);
@@ -42,6 +46,10 @@ async function teamPage(req, res, next) {
 
         
     }
+
+    res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.header("Pragma", "no-cache");
+    res.header("Expires", 0);
 
     res.render(path.join(__dirname, '../html/tournamentTeam.html'), {
         id: req.session.userId,
@@ -72,6 +80,9 @@ async function lookupUser(req, res, next) {
         result = [user];
     }
 
+    if (result.length !== 1)
+        result = [];
+
     res.send(result);
 }
 
@@ -87,8 +98,11 @@ async function lookupTeam(req, res, next) {
  * @param {express.NextFunction} next The next function to run if this one has nothing to do
  */
 async function registerPage(req, res, next) {
-    if (req.body.team && req.body.name) {
-        var team = req.body.team.filter(n => n);
+    if (!req.session.userId)
+        return res.redirect('/');
+
+    if (req.body.team) {
+        var team = req.body.team.filter(n => n && n !== req.session.userId);
         var captain = req.session.userId;
 
         // add the current user as team captain
@@ -100,7 +114,7 @@ async function registerPage(req, res, next) {
         await databaseApi.saveTournamentTeam(req.session.userId, team, req.session.userId, req.body.name);
     }
 
-    return res.redirect('/team');
+    await basePage(req, res, next);
 }
 
 /**
@@ -130,7 +144,12 @@ async function updatePage(req, res, next) {
  * @param {express.NextFunction} next The next function to run if this one has nothing to do
  */
 async function deletePage(req, res, next) {
+    if (!req.session.userId)
+        return res.redirect('/');
+        
+    await databaseApi.deleteTournamentTeam(req.session.userId);
 
+    await basePage(req, res, next);
 }
 
 /**
@@ -138,9 +157,9 @@ async function deletePage(req, res, next) {
  * @param {express.Express} app The express app
  */
  function init(app) {
-    app.get('/team', teamPage);
     app.get('/team/find/user', lookupUser);
     app.get('/team/find/team', lookupTeam);
+    app.get('/team*', teamPage);
     app.post('/team/register', registerPage);
     app.post('/team/leave', leavePage);
     app.post('/team/update', updatePage);

@@ -66,79 +66,117 @@
             <% } %>
 			<a class="btn btn-primary" href="/" role="button">Home</a>
 		</div>
-		<% if (tournamentTeam) { %>
-			<div class="container">
-				<div class="row" style="margin-bottom: 14px;">
-					<div class="col-8 offset-2">
-						<h3><%= username %> is on team <%= tournamentTeam.name %></h3>
-					</div>
-				</div>
-				<div class="row" style="margin-bottom: 14px;">
-					<div class="col-8 offset-2">
-						<h4>Team Captain: <%= tournamentTeam.captain %></h4>
-					</div>
-				</div>
-				<div class="row" style="margin-bottom: 14px;">
-					<div class="col-8 offset-2">
-						<h3>Members</h3>
-					</div>
-				</div>
-				<% var first = true; %>
-				<% tournamentTeam.team.forEach(function (member) { %>
+		<% if (tournamentTeam && tournamentTeam.team && tournamentTeam.team.length > 0) { %>
+			<form action="/team/register" method="post">
+				<div class="container">
 					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-1 offset-2">
-							<% if (!first) { %>
-							<button class="btn btn-primary" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
-							<% } first = false; %>
+						<div class="col-12 col-md-8 offset-md-2">
+							<h3><%= username %> is on:</h3>
+							<% if (tournamentTeam.team[0].userId === id) { %>
+								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" />
+							<% } else { %>
+								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" disabled />
+							<% } %>
 						</div>
-						<div class="col-1">
-							<img src="<%= member.avatar %>" style="width:50px;" />
+					</div>
+					<div class="row" style="margin-bottom: 14px;">
+						<div class="col-12 col-md-8 offset-md-2">
+							<h4>Team Captain: <%= tournamentTeam.captain %></h4>
 						</div>
-						<div class="col-6">
-							<h5>
-								<%= member.name %>
-							</h5>
-							<div>
-								<%= member.userId %>
+					</div>
+					<div class="row" style="margin-bottom: 14px;">
+						<div class="col-12 col-md-8 offset-md-2">
+							<h3>Members</h3>
+						</div>
+					</div>
+					<% var first = true; %>
+					<% tournamentTeam.team.forEach(function (member) { %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-1 col-md-1 offset-md-2">
+								<% if (!first && tournamentTeam.team[0].userId === id) { %>
+								<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
+								<% } first = false; %>
 							</div>
-							
-							<input type="hidden" class="form-control" name="team[]" value="<%= member.userId %>" />
+							<div class="col-2 col-md-1">
+								<img src="<%= member.avatar %>" style="width:50px;" />
+							</div>
+							<div class="col-9 col-md-6">
+								<h5 class="username">
+									<%= member.name %>
+								</h5>
+								<div class="userid">
+									<%= member.userId %>
+								</div>
+								
+								<input type="hidden" class="form-control userid-value" name="team[]" value="<%= member.userId %>" />
+							</div>
 						</div>
-					</div>
-				<% }); %>
-				<% for (var i = 0; i < 6 - tournamentTeam.team.length; i++) { %>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-8 offset-2">
-							<input type="text" class="form-control" name="team[]" value="" placeholder="User" />
+					<% }); %>
+					<% for (var i = 0; i < 6 - tournamentTeam.team.length; i++) { %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-1 col-md-1 offset-md-2 no-gutters">
+								<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+							</div>
+							<div class="col-2 col-md-1 no-gutters">
+								<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+							</div>
+							<div class="col-9 col-md-6 no-gutters">
+								<div class="input-group">
+									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+									<div class="input-group-append">
+										<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+									</div>
+								</div>
+							</div>
 						</div>
-					</div>
-				<% } %>
-			</div>
+					<% } %>
+					<% if (tournamentTeam.team[0].userId === id) { %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<div class="float-left">
+									<button type="button" class="btn btn-primary delete-team">Delete Team</button>
+								</div>
+								<div class="float-right">
+									<button type="submit" class="btn btn-primary" disabled>Submit</button>
+								</div>
+							</div>
+						</div>
+
+						<script>
+							$(document).ready(function() {
+								$(".delete-team").click(function() {
+									$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
+								});
+							});
+						</script>
+					<% } %>
+				</div>
+			</form>
 		<% } else { %>
 			<form action="/team/register" method="post">
 				<div class="container">
 					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-8 offset-2">
+						<div class="col-12 col-md-8 offset-md-2">
 							<h2>Register a team</h2>
 						</div>
 					</div>
 					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-8 offset-2">
+						<div class="col-12 col-md-8 offset-md-2">
 							<h3>Team Name</h3>
-							<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" required aria-required />
+							<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" />
 						</div>
 					</div>
 					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-8 offset-2">
+						<div class="col-12 col-md-8 offset-md-2">
 							<h3>Members</h3>
 						</div>
 					</div>
 					<div class="row no-gutters" style="margin-bottom: 14px;">
-						<div class="col-1 offset-2 no-gutters"></div>
-						<div class="col-1 no-gutters">
+						<div class="col-1 col-md-1 offset-md-2 no-gutters"></div>
+						<div class="col-2 col-md-1 no-gutters">
 							<img src="<%= avatar %>" style="width:100%; max-width:50px;" />
 						</div>
-						<div class="col-6 no-gutters">
+						<div class="col-9 col-md-6 no-gutters">
 							<h5>
 								<%= username %>
 							</h5>
@@ -149,15 +187,15 @@
 					</div>
 					<% for (var i = 0; i < 5; i++) { %>
 						<div class="row no-gutters" style="margin-bottom: 14px;">
-							<div class="col-1 offset-2 no-gutters">
+							<div class="col-1 col-md-1 offset-md-2 no-gutters">
 								<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
 							</div>
-							<div class="col-1 no-gutters">
+							<div class="col-2 col-md-1 no-gutters">
 								<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
 							</div>
-							<div class="col-6 no-gutters">
+							<div class="col-9 col-md-6 no-gutters">
 								<div class="input-group">
-									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" required aria-required />
+									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
 									<div class="input-group-append">
 										<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
 									</div>
@@ -165,93 +203,125 @@
 							</div>
 						</div>
 					<% } %>
-					<script>
-						$(document).ready(function() {
-							var nouserhtml = `<div class="col-1 offset-2 no-gutters">
-								<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
-							</div>
-							<div class="col-1 no-gutters">
-								<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
-							</div>
-							<div class="col-6 no-gutters">
-								<div class="input-group">
-									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" required aria-required />
-									<div class="input-group-append">
-										<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
-									</div>
-								</div>
-							</div>`;
-							var newrowhtml = `<div class="col-1 offset-2">
-									<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
-								</div>
-								<div class="col-1">
-									<img class="user-avatar" src="" style="width:50px;" />
-								</div>
-								<div class="col-6">
-									<h5 class="username"></h5>
-									<div class="userid"></div>
-									
-									<input type="hidden" class="form-control userid-value" name="team[]" value="" />
-								</div>`;
-
-							function deleteRow() {
-								var button = $(this);
-								var row = button.closest(".row");
-								row.empty();
-
-								row.append(nouserhtml);
-
-								row.find(".discord-search").click(discordSearch);
-							}
-
-							function discordSearch() {
-								var button = $(this);
-								var row = button.closest(".row");
-								var input = row.find(".discord-search-text");
-
-								var newrow = $(newrowhtml);
-								var founduser = newrow.find(".user-found");
-								var avatar = newrow.find(".user-avatar");
-								var username = newrow.find(".username");
-								var userid = newrow.find(".userid");
-								var useridvalue = newrow.find(".userid-value");
-								console.dir(input);
-								$.ajax({
-									url: "/team/find/user",
-									type: "get",
-									data: $.param({
-										search: input.val()
-									}),
-									success: function(data) {
-										row.empty();
-
-										if (data && data.length === 1) {
-											username.text(data[0].name);
-											userid.text(data[0].id);
-											useridvalue.val(data[0].id);
-											avatar.attr("src", data[0].avatar);
-
-											newrow.find(".remove-user").click(deleteRow);
-
-											row.append(newrow);
-										}
-									}
-								});
-							}
-
-							$(".discord-search").click(discordSearch);
-						});
-					</script>
 					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-8 offset-2">
+						<div class="col-12 col-md-8 offset-md-2">
 							<div class="float-right">
-								<button type="submit" class="btn btn-primary">Submit</button>
+								<button type="submit" class="btn btn-primary" disabled>Submit</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
 		<% } %>
+		<script>
+			$(document).ready(function() {
+				var nouserhtml = `<div class="col-1 col-md-1 offset-md-2 no-gutters">
+					<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+				</div>
+				<div class="col-2 col-md-1 no-gutters">
+					<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+				</div>
+				<div class="col-9 col-md-6 no-gutters">
+					<div class="input-group">
+						<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+						</div>
+					</div>
+				</div>`;
+				var newrowhtml = `<div class="col-1 col-md-1 offset-md-2">
+						<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
+					</div>
+					<div class="col-2 col-md-1">
+						<img class="user-avatar" src="" style="width:50px;" />
+					</div>
+					<div class="col-6">
+						<h5 class="username"></h5>
+						<div class="userid"></div>
+						
+						<input type="hidden" class="form-control userid-value" name="team[]" value="" />
+					</div>`;
+
+				function deleteRow() {
+					var button = $(this);
+					var row = button.closest(".row");
+					var useridvalue = row.find(".userid-value").val();
+
+					row.empty();
+
+					row.append(nouserhtml);
+
+					row.find(".discord-search").click(discordSearch);
+
+					$("button[type=submit]").prop("disabled", false);
+				}
+
+				function discordSearch() {
+					var button = $(this);
+					var row = button.closest(".row");
+					var input = row.find(".discord-search-text");
+
+					var newrow = $(newrowhtml);
+					var founduser = newrow.find(".user-found");
+					var avatar = newrow.find(".user-avatar");
+					var username = newrow.find(".username");
+					var userid = newrow.find(".userid");
+					var useridvalue = newrow.find(".userid-value");
+					$.ajax({
+						url: "/team/find/user",
+						type: "get",
+						data: $.param({
+							search: input.val()
+						}),
+						success: function(data) {
+
+							console.dir(data);
+
+							if (data && data.length === 1) {
+								var exists = false;
+								
+								$(".userid-value").each(function() {
+									if ($(this).val() === data[0].id)
+										exists = true;
+								});
+
+								if (!exists) {
+									row.empty();
+
+									username.text(data[0].name);
+									userid.text(data[0].id);
+									useridvalue.val(data[0].id);
+									avatar.attr("src", data[0].avatar);
+
+									newrow.find(".remove-user").click(deleteRow);
+
+									row.append(newrow);
+
+									$("button[type=submit]").prop("disabled", false);
+
+									return;
+								} else {
+									alert("This user is already on your team");
+
+									input.val("");
+								}
+								
+							} else {
+								if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
+									window.open("https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-");
+								}
+							}
+						}
+					});
+				}
+
+				$(".discord-search").click(discordSearch);
+				$(".remove-user").click(deleteRow);
+				$("input[name=name]").on("input", function() {
+					$("button[type=submit]").prop("disabled", false);
+				});
+			});
+		</script>
 	</div>
 </body>
 </html>

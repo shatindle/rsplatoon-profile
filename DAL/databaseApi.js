@@ -627,6 +627,9 @@ async function saveTournamentTeam(userId, team, captain, name) {
     if (docs && docs.size === 0) {
         // TODO: verify the data is good
 
+        if (!name)
+            name = "[No Name]";
+
         await db.collection("tournamentteams").add({
             team,
             captain,
@@ -642,7 +645,12 @@ async function saveTournamentTeam(userId, team, captain, name) {
 
         var newData = {};
 
-        var data = doc.data();
+        var data;
+
+        docs.forEach(e => data = e.data());
+
+        if (data.captain !== captain)
+            throw "Cannot modify another team";
 
         if (Array.isArray(team)) {
             // TODO: verify the data is good
@@ -668,17 +676,29 @@ async function saveTournamentTeam(userId, team, captain, name) {
             await element.ref.set(newData, { merge: true });
         });
 
+        await delay(1000);
+
         return;
     }
 }
 
+async function delay(t, val) {
+    return new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve(val);
+        }, t);
+    });
+ }
+
 async function deleteTournamentTeam(userId) {
-    var ref = await db.collection("tournamentteams").where('members', 'array-contains', userId);
+    var ref = await db.collection("tournamentteams").where('captain', '=', userId);
     var docs = await ref.get();
 
     docs.forEach(async element => {
         await element.ref.delete();
     });
+
+    await delay(1000);
 }
 
 module.exports = {
@@ -693,5 +713,6 @@ module.exports = {
     getAllBots,
 
     getTournamentTeam,
-    saveTournamentTeam
+    saveTournamentTeam,
+    deleteTournamentTeam
 };
