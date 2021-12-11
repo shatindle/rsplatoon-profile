@@ -378,6 +378,12 @@
 
 										input.val("");
 									}
+								} else {
+									if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
+										window.open("https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-");
+									}
+
+									input.val("");
 								}
 							} else {
 								if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
