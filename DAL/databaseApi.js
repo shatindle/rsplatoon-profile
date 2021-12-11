@@ -620,25 +620,79 @@ async function getTournamentTeam(userId) {
     }
 }
 
-async function saveTournamentTeam(userId, team, captain, name) {
+function sanitizeTournamentChoice(tournament) {
+    switch (tournament) {
+        case "casual":
+            return "casual";
+        case "competitive":
+            return "competitive";
+        default:
+            return "competitive";
+    }
+}
+
+async function validateTeam(captain, team) {
+    if (captain && team && team.length > 0) {
+        for (var i = 0; i < team.length; i++) {
+            var member = team[i];
+
+            var ref = await db.collection("tournamentteams").where('team', 'array-contains', member);
+            var docs = await ref.get();
+
+            if (docs) {
+                if (docs.size === 1) {
+                    // make sure the team captain is our captain
+                    var thisCaptain = null;
+                    docs.forEach(async element => {
+                        thisCaptain = element.data().captain;
+                    });
+
+                    if (thisCaptain !== captain)
+                        return "User " + team[i] + " is already on a team";
+                } else if (docs.size > 1) {
+                    // invalid team
+                    return "User " + team[i] + " is already on a team";
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return "Invalid team or captain";
+}
+
+async function validateTournamentUser(userId) {
+    var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
+    var docs = await ref.get();
+
+    return !(docs && docs.size > 0);
+}
+
+async function saveTournamentTeam(userId, team, captain, name, tournament) {
     var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
     var docs = await ref.get();
 
     if (docs && docs.size === 0) {
-        // TODO: verify the data is good
-
         if (!name)
             name = "[No Name]";
 
-        await db.collection("tournamentteams").add({
-            team,
-            captain,
-            name,
-            createdOn: Firestore.Timestamp.now(),
-            updatedOn: Firestore.Timestamp.now()
-        });
-        
-        return;
+        tournament = sanitizeTournamentChoice(tournament);
+
+        var result = await validateTeam(captain, team);
+
+        if (typeof (result) === "boolean" && result) {
+            await db.collection("tournamentteams").add({
+                team,
+                captain,
+                name,
+                tournament,
+                createdOn: Firestore.Timestamp.now(),
+                updatedOn: Firestore.Timestamp.now()
+            });
+        }
+
+        return result;
     } else {
         if (docs.size !== 1)
             throw "Multiple team matches found";
@@ -653,21 +707,28 @@ async function saveTournamentTeam(userId, team, captain, name) {
             throw "Cannot modify another team";
 
         if (Array.isArray(team)) {
-            // TODO: verify the data is good
-            data.team = team;
-            newData.team = team;
-        }
+            var result = await validateTeam(captain, team);
 
-        if (captain) {
-            // TODO: verify the data is good
-            data.captain = captain;
-            newData.captain = captain;
+            if (typeof (result) === "boolean" && result) {
+                data.team = team;
+                newData.team = team;
+            } else {
+                return result;
+            }
         }
 
         if (name) {
-            // TODO: verify the data is good
+            if (name.length > 20) 
+                name = name.substring(0, 20);
+
             data.name = name;
             newData.name = name;
+        }
+
+        if (tournament) {
+            tournament = sanitizeTournamentChoice(tournament);
+            data.tournament = tournament;
+            newData.tournament = tournament;
         }
 
         newData.updatedOn = Firestore.Timestamp.now();
@@ -680,6 +741,28 @@ async function saveTournamentTeam(userId, team, captain, name) {
 
         return;
     }
+}
+
+async function leaveTournamentTeam(userId) {
+    var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
+    var docs = await ref.get();
+
+    if (docs && docs.size > 0) {
+        docs.forEach(async element => {
+            var data = element.data();
+
+            if (data.team && data.team.length) {
+                var index = data.team.indexOf(userId);
+
+                if (index !== -1) {
+                    data.team.splice(index, 1);
+                    await element.ref.set({ team: data.team }, { merge: true });
+                }
+            }
+        });
+    }
+
+    await delay(1000);
 }
 
 async function delay(t, val) {
@@ -714,5 +797,7 @@ module.exports = {
 
     getTournamentTeam,
     saveTournamentTeam,
-    deleteTournamentTeam
+    deleteTournamentTeam,
+    leaveTournamentTeam,
+    validateTournamentUser
 };

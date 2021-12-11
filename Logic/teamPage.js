@@ -3,6 +3,7 @@ const path = require('path');
 const databaseApi = require("../DAL/databaseApi");
 const appSettings = require("../settings.json");
 const discordApi = require("../DAL/discordApi");
+const mee6Api = require("../DAL/mee6Api");
 
 /**
  * @description View your team or register a team
@@ -28,7 +29,8 @@ async function basePage(req, res, next) {
         teamData = {
             name: tournamentTeam.name,
             captain: tournamentTeam.captain,
-            team: []
+            team: [],
+            tournament: tournamentTeam.tournament
         };
 
         for (var i = 0; i < tournamentTeam.team.length; i++) {
@@ -76,14 +78,33 @@ async function lookupUser(req, res, next) {
 
     if (user === "unknown") {
         result = await discordApi.findUserByName(req.query.search);
+
+        if (result.length === 0) {
+            // search other user repos
+            if (appSettings.otherServers && appSettings.otherServers.length) {
+                for (var i = 0; i < appSettings.otherServers.length; i++) {
+                    var otherServer = appSettings.otherServers[i];
+                    result = await mee6Api.searchUserList(otherServer, req.query.search);
+
+                    if (result && result.length > 0) 
+                        break;
+                }
+            }
+        }
     } else {
         result = [user];
     }
 
     if (result.length !== 1)
         result = [];
-
-    res.send(result);
+    else {
+        // verify the user is not on a team yet
+        if (await databaseApi.validateTournamentUser(result[0].id)) {
+            res.send(result);
+        } else {
+            res.send(result[0].name + " is already on a team");
+        }
+    }    
 }
 
 async function lookupTeam(req, res, next) {
@@ -111,7 +132,7 @@ async function registerPage(req, res, next) {
         if (team.length > 6 || team.length < 4)
             return res.status(500).send({ error: "incorrect team count" });
 
-        await databaseApi.saveTournamentTeam(req.session.userId, team, req.session.userId, req.body.name);
+        await databaseApi.saveTournamentTeam(req.session.userId, team, req.session.userId, req.body.name, req.body.tournament);
     }
 
     await basePage(req, res, next);
@@ -124,7 +145,12 @@ async function registerPage(req, res, next) {
  * @param {express.NextFunction} next The next function to run if this one has nothing to do
  */
 async function leavePage(req, res, next) {
+    if (!req.session.userId)
+        return res.redirect('/');
 
+    await databaseApi.leaveTournamentTeam(req.session.userId);
+
+    await basePage(req, res, next);
 }
 
 /**

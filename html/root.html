@@ -68,7 +68,13 @@
 			<div class="row" style="margin-bottom:14px;">
 				<div class="col">
 					<h3>The Splat-off into a New Year Tournament Signup is underway!</h3>
-					<p>Are you ready to signup your team?  If so, <a href="/team">head over to the team signup page!</a>  Only the team captain should sign the team up.</p>
+					<p>Are you ready to signup your team?  If so, 
+						<% if (id) {%>
+							<a href="/team">head over to the team signup page!</a>
+						<% } else { %>
+							login, then head over to the team signup page!
+						<% } %>
+						Only the team captain should sign the team up.</p>
 				</div>
 			</div>
 		</div>

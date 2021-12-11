@@ -67,7 +67,7 @@
 			<a class="btn btn-primary" href="/" role="button">Home</a>
 		</div>
 		<% if (tournamentTeam && tournamentTeam.team && tournamentTeam.team.length > 0) { %>
-			<form action="/team/register" method="post">
+			<form action="/team/register" method="post" onsubmit="return validateForm()">
 				<div class="container">
 					<div class="row" style="margin-bottom: 14px;">
 						<div class="col-12 col-md-8 offset-md-2">
@@ -82,6 +82,39 @@
 					<div class="row" style="margin-bottom: 14px;">
 						<div class="col-12 col-md-8 offset-md-2">
 							<h4>Team Captain: <%= tournamentTeam.captain %></h4>
+						</div>
+					</div>
+					<div class="row" style="margin-bottom: 14px;">
+						<div class="col-12 col-md-8 offset-md-2">
+							<h4>Tournament</h4>
+							<p>
+								There will be two tournaments available on <b>January 8, 2022</b>: a <b>Casual</b> tournament and a <b>Competitive</b> tournament.  
+								<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
+								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+								The Casual tournament will be in the morning US Eastern time while the Competitive tournament will be in the afternoon US Eastern time.
+								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+								Your team may only participate in one tournament.  Choose your tournament below.
+							</p>
+							<div>
+								<select name="tournament" class="form-control" <%= (tournamentTeam.team[0].userId === id) ? "" : "disabled" %>>
+									<option value="">Select a Tournament</option>
+									<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual</option>
+									<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="row" style="margin-bottom: 14px;">
+						<div class="col-12 col-md-8 offset-md-2">
+							<h3>Members</h3>
+							<p>
+								Please name 3-5 other players who will be on your team.  
+								You will only be able to register players who are not already on a team.
+								You are expected to confirm that these players want be on your team before you sign them up.
+								Failure to do so will disqualify you from participating in the tournaments.
+								You may search by username#0000 or by Discord ID.
+								<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+							</p>
 						</div>
 					</div>
 					<div class="row" style="margin-bottom: 14px;">
@@ -134,7 +167,7 @@
 						<div class="row" style="margin-bottom: 14px;">
 							<div class="col-12 col-md-8 offset-md-2">
 								<div class="float-left">
-									<button type="button" class="btn btn-primary delete-team">Delete Team</button>
+									<button type="button" class="btn btn-danger delete-team">Delete Team</button>
 								</div>
 								<div class="float-right">
 									<button type="submit" class="btn btn-primary" disabled>Submit</button>
@@ -145,15 +178,25 @@
 						<script>
 							$(document).ready(function() {
 								$(".delete-team").click(function() {
-									$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
+									if (confirm("You are about to delete your current team.  Are you sure?")) {
+										$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
+									}
 								});
 							});
 						</script>
+					<% } else { %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<div class="float-right">
+									<button type="button" class="btn btn-danger leave-team">Leave Team</button>
+								</div>
+							</div>
+						</div>
 					<% } %>
 				</div>
 			</form>
 		<% } else { %>
-			<form action="/team/register" method="post">
+			<form action="/team/register" method="post" onsubmit="return validateForm()">
 				<div class="container">
 					<div class="row" style="margin-bottom: 14px;">
 						<div class="col-12 col-md-8 offset-md-2">
@@ -168,7 +211,35 @@
 					</div>
 					<div class="row" style="margin-bottom: 14px;">
 						<div class="col-12 col-md-8 offset-md-2">
+							<h4>Tournament</h4>
+							<p>
+								There will be two tournaments available: a <b>Casual</b> tournament and a <b>Competitive</b> tournament.  
+								<span style="text-decoration: underline;">Anyone can participate in the Competitive tournament.</span>
+								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+								The Casual tournament will be in the morning US Eastern time while the Competitive tournament will be in the afternoon US Eastern time.
+								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+								Your team may only participate in one tournament.  Choose your tournament below.
+							</p>
+							<div>
+								<select name="tournament" class="form-control">
+									<option value="">Select a Tournament</option>
+									<option value="casual">Casual</option>
+									<option value="competitive">Competitive</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="row" style="margin-bottom: 14px;">
+						<div class="col-12 col-md-8 offset-md-2">
 							<h3>Members</h3>
+							<p>
+								Please name 3-5 other players who will be on your team.  
+								You will only be able to register players who are not already on a team.
+								You are expected to confirm that these players want be on your team before you sign them up.
+								Failure to do so will disqualify you from participating in the tournaments.
+								You may search by username#0000 or by Discord ID.
+								<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+							</p>
 						</div>
 					</div>
 					<div class="row no-gutters" style="margin-bottom: 14px;">
@@ -274,38 +345,40 @@
 							search: input.val()
 						}),
 						success: function(data) {
-
-							console.dir(data);
-
-							if (data && data.length === 1) {
-								var exists = false;
-								
-								$(".userid-value").each(function() {
-									if ($(this).val() === data[0].id)
-										exists = true;
-								});
-
-								if (!exists) {
-									row.empty();
-
-									username.text(data[0].name);
-									userid.text(data[0].id);
-									useridvalue.val(data[0].id);
-									avatar.attr("src", data[0].avatar);
-
-									newrow.find(".remove-user").click(deleteRow);
-
-									row.append(newrow);
-
-									$("button[type=submit]").prop("disabled", false);
-
-									return;
-								} else {
-									alert("This user is already on your team");
+							if (data) {
+								if (typeof(data) === "string") {
+									alert("Error: " + data + ".  If you believe this is an error, please have them reach out to the event organizers.");
 
 									input.val("");
-								}
+								} else if (data.length === 1) {
+									var exists = false;
 								
+									$(".userid-value").each(function() {
+										if ($(this).val() === data[0].id)
+											exists = true;
+									});
+
+									if (!exists) {
+										row.empty();
+
+										username.text(data[0].name);
+										userid.text(data[0].id);
+										useridvalue.val(data[0].id);
+										avatar.attr("src", data[0].avatar);
+
+										newrow.find(".remove-user").click(deleteRow);
+
+										row.append(newrow);
+
+										$("button[type=submit]").prop("disabled", false);
+
+										return;
+									} else {
+										alert("This user is already on your team");
+
+										input.val("");
+									}
+								}
 							} else {
 								if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
 									window.open("https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-");
@@ -315,12 +388,29 @@
 					});
 				}
 
+				function leaveTeam() {
+					if (confirm("You are about to leave your current team.  Are you sure?")) {
+						$('<form action="/team/leave" method="POST"></form>').appendTo("body").submit();
+					}
+				}
+
 				$(".discord-search").click(discordSearch);
 				$(".remove-user").click(deleteRow);
 				$("input[name=name]").on("input", function() {
 					$("button[type=submit]").prop("disabled", false);
 				});
+				$("select[name=tournament]").change(function() {
+					$("button[type=submit]").prop("disabled", false);
+				});
+				$(".leave-team").click(leaveTeam);
 			});
+			
+			function validateForm() {
+				if ($(".userid-value").length < 4 || $(".userid-value").length > 6) {
+					alert("Teams must consist of 4-6 players.");
+					return false;
+				}
+			}
 		</script>
 	</div>
 </body>
