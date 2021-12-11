@@ -248,12 +248,14 @@
 							<img src="<%= avatar %>" style="width:100%; max-width:50px;" />
 						</div>
 						<div class="col-9 col-md-6 no-gutters">
-							<h5>
+							<h5 class="username">
 								<%= username %>
 							</h5>
-							<div>
+							<div class="userid">
 								<%= id %>
 							</div>
+							
+							<input type="hidden" class="form-control userid-value" name="team[]" value="<%= id %>" />
 						</div>
 					</div>
 					<% for (var i = 0; i < 5; i++) { %>
@@ -412,7 +414,7 @@
 			});
 			
 			function validateForm() {
-				if ($(".userid-value").length < 4 || $(".userid-value").length > 6) {
+				if ($(".userid-value").length < 3 || $(".userid-value").length > 5) {
 					alert("Teams must consist of 4-6 players.");
 					return false;
 				}
