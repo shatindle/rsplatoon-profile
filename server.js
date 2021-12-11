@@ -51,6 +51,7 @@ app.use(async (req, res, next) => {
 require("./Logic/discordLoginPage").init(app);
 require("./Logic/dripPage").init(app);
 require("./Logic/settingsPage").init(app);
+require("./Logic/teamPage").init(app);
 
 async function rootPage(req, res, next) {
     try {

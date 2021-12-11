@@ -117,6 +117,10 @@ body {
     border-color: #5cd05b;
 }
 
+.btn.btn-danger {
+    padding: 2px 10px;
+}
+
 .needtojoin {
     background-color: #5f0fb4;
 }
