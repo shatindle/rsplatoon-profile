@@ -15,6 +15,10 @@
     position: relative;
 }
 
+.jumbotron-splatoff {
+    background-image: url("/css/img/hostjumbo.jpg");
+}
+
 .jumbotron h1, .jumbotron h2 {
     font-family: "SplatRegular";
     text-align: right;

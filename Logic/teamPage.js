@@ -39,7 +39,7 @@ async function basePage(req, res, next) {
             teamData.team.push({
                 userId: user.id,
                 name: user.name,
-                avatar: user.avatar
+                avatar: user.avatar ? user.avatar : "/css/img/discord.png"
             });
 
             if (user.id === tournamentTeam.captain)
@@ -107,6 +107,9 @@ async function lookupUser(req, res, next) {
     } else {
         // verify the user is not on a team yet
         if (await databaseApi.validateTournamentUser(result[0].id)) {
+            if (!result[0].avatar)
+                result[0].avatar = "/css/img/discord.png";
+                
             res.send(result);
         } else {
             res.send(result[0].name + " is already on a team");

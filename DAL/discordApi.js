@@ -67,7 +67,7 @@ async function findUserByName(search) {
             return {
                 id: member.user.id,
                 name: member.user.username + "#" + member.user.discriminator,
-                avatar: `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}`
+                avatar: member.user.avatar ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}` : "/css/img/discord.png"
             };
         }).slice(0, 5);
     } catch (err) {

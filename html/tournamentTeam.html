@@ -26,12 +26,12 @@
 </head>
 <body>
 	<div class="container" style="margin-bottom:100px;padding-left:0;padding-right:0;">
-		<div class="jumbotron">
+		<div class="jumbotron jumbotron-splatoff">
 			<div>
-				<a href="https://discord.gg/rsplatoon" target="_blank">
-					<img class="center-block" src="/css/img/logo.png" style="width:300px;height:auto;margin-top:0"/>
+				<a href="#">
+					<img class="center-block" src="/css/img/logo-splatoff.png" style="width:300px;height:auto;margin-top:0"/>
 				</a>
-				<h1>Team</h1>
+				<h1>Team Signup</h1>
 			</div>
             <% if (id) { %>
 				<div id="userinfo">
@@ -73,7 +73,8 @@
 						<div class="col-12 col-md-8 offset-md-2">
 							<h3><%= username %> is on:</h3>
 							<% if (tournamentTeam.team[0].userId === id) { %>
-								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" />
+								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" maxlength="20" />
+								<p>Choose a team name!  No more than 20 characters.</p>
 							<% } else { %>
 								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" disabled />
 							<% } %>
@@ -206,7 +207,8 @@
 					<div class="row" style="margin-bottom: 14px;">
 						<div class="col-12 col-md-8 offset-md-2">
 							<h3>Team Name</h3>
-							<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" />
+							<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" maxlength="20" />
+							<p>Choose a team name!  No more than 20 characters.</p>
 						</div>
 					</div>
 					<div class="row" style="margin-bottom: 14px;">

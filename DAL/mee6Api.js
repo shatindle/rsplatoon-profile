@@ -66,7 +66,7 @@ async function searchUserList(serverId, search) {
             return {
                 id: member.id,
                 name: member.username + "#" + member.discriminator,
-                avatar: `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}`
+                avatar: member.avatar ? `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}` : "/css/img/discord.png"
             };
         }).slice(0, 5);
     } else {
