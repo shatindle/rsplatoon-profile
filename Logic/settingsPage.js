@@ -48,7 +48,9 @@ async function updateKeyPage(req, res, next) {
             saveFriendCode: req.body.saveFriendCode.length === 2 ? true : false,
             saveUsername: req.body.saveUsername.length === 2 ? true : false,
             saveDrip: req.body.saveDrip.length === 2 ? true : false,
-            deleteProfile: req.body.deleteProfile.length === 2 ? true : false
+            deleteProfile: req.body.deleteProfile.length === 2 ? true : false,
+            teamWebhook: req.body.teamWebhook.length === 2 ? true : false,
+            teamQuery: req.body.teamQuery.length === 2 ? true : false
         }, false);
     }
 
@@ -66,6 +68,8 @@ async function grantKeyPage(req, res, next) {
             saveUsername: req.body.permissions && req.body.permissions.indexOf("saveUsername") > -1,
             saveDrip: req.body.permissions && req.body.permissions.indexOf("saveDrip") > -1,
             deleteProfile: req.body.permissions && req.body.permissions.indexOf("deleteProfile") > -1,
+            teamWebhook: req.body.permissions && req.body.permissions.indexOf("teamWebhook") > -1,
+            teamQuery: req.body.permissions && req.body.permissions.indexOf("teamQuery") > -1,
             nobot: false
         }, true);
     }

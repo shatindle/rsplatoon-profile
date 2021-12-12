@@ -166,6 +166,10 @@ async function botTokenLogin(req, res) {
                 req.session.saveDrip = bot.saveDrip;
                 req.session.deleteProfile = bot.deleteProfile;
 
+                // tournament roles
+                req.session.teamWebhook = bot.teamWebhook;
+                req.session.teamQuery = bot.teamQuery;
+
                 return true;
             }
         }

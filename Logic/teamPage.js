@@ -118,8 +118,16 @@ async function lookupUser(req, res, next) {
 }
 
 async function lookupTeam(req, res, next) {
-    if (!req.session.userId)
-        return res.redirect('/');
+    if (req.session.userId) {
+
+    } else if (req.session.isBot && req.session.teamQuery) {
+        const data = await databaseApi.getAllTournamentTeams(req.query.tournament);
+
+        res.send(data);
+        return;
+    }
+
+    return res.redirect('/');
 }
 
 /**
@@ -194,7 +202,7 @@ async function deletePage(req, res, next) {
  */
  function init(app) {
     app.get('/team/find/user', lookupUser);
-    app.get('/team/find/team', lookupTeam);
+    app.get('/team/find/teams', lookupTeam);
     app.get('/team*', teamPage);
     app.post('/team/register', registerPage);
     app.post('/team/leave', leavePage);

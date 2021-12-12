@@ -125,6 +125,8 @@
 													<th scope="col">Save Name</th>
 													<th scope="col">Save Drip</th>
 													<th scope="col">Delete Profile</th>
+													<th scope="col">Team Query</th>
+													<th scope="col">Team Webhook</th>
 													<th scope="col">Revoked</th>
 													<th scope="col">Update</th>
 													<th scope="col">Reset</th>
@@ -168,6 +170,18 @@
 																	<div class="form-check">
 																		<input type="hidden" name="deleteProfile" value="0" />
 																		<input class="form-check-input" type="checkbox" value="1" name="deleteProfile" style="width:auto" <%= (allbots[i].deleteProfile) ? 'checked' : '' %>>
+																	</div>
+																</td>
+																<td>
+																	<div class="form-check">
+																		<input type="hidden" name="teamQuery" value="0" />
+																		<input class="form-check-input" type="checkbox" value="1" name="teamQuery" style="width:auto" <%= (allbots[i].teamQuery) ? 'checked' : '' %>>
+																	</div>
+																</td>
+																<td>
+																	<div class="form-check">
+																		<input type="hidden" name="teamWebhook" value="0" />
+																		<input class="form-check-input" type="checkbox" value="1" name="teamWebhook" style="width:auto" <%= (allbots[i].teamWebhook) ? 'checked' : '' %>>
 																	</div>
 																</td>
 																<td>
@@ -218,7 +232,6 @@
 								</div>
 								<script>
 									function copyToClipboard() {
-										console.log("going");
 										$("#copy-input").focus();
 										$("#copy-input").select();
 										document.execCommand("copy");

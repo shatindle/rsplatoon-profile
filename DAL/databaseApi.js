@@ -461,6 +461,8 @@ async function saveBot(userId, changes, updateVersion) {
             saveUsername: "saveUsername" in changes ? changes.saveUsername : false,
             saveDrip: "saveDrip" in changes ? changes.saveDrip : false,
             deleteProfile: "deleteProfile" in changes ? changes.deleteProfile : false,
+            teamQuery: "teamQuery" in changes ? changes.teamQuery : false,
+            teamWebhook: "teamWebhook" in changes ? changes.teamWebhook : false,
             nobot: "nobot" in changes ? changes.nobot : false
         });
 
@@ -482,6 +484,8 @@ async function saveBot(userId, changes, updateVersion) {
             saveUsername: "saveUsername" in changes ? changes.saveUsername : false,
             saveDrip: "saveDrip" in changes ? changes.saveDrip : false,
             deleteProfile: "deleteProfile" in changes ? changes.deleteProfile : false,
+            teamQuery: "teamQuery" in changes ? changes.teamQuery : false,
+            teamWebhook: "teamWebhook" in changes ? changes.teamWebhook : false,
             nobot: "nobot" in changes ? changes.nobot : false
         }, botCache);
 
@@ -521,6 +525,30 @@ async function saveBot(userId, changes, updateVersion) {
 
             newData.saveDrip = changes.saveDrip;
             data.saveDrip = changes.saveDrip;
+        }
+
+        if ("deleteProfile" in changes) {
+            if (!changes.deleteProfile)
+                changes.deleteProfile = false;
+
+            newData.deleteProfile = changes.deleteProfile;
+            data.deleteProfile = changes.deleteProfile;
+        }
+
+        if ("teamQuery" in changes) {
+            if (!changes.teamQuery)
+                changes.teamQuery = false;
+
+            newData.teamQuery = changes.teamQuery;
+            data.teamQuery = changes.teamQuery;
+        }
+
+        if ("teamWebhook" in changes) {
+            if (!changes.teamWebhook)
+                changes.teamWebhook = false;
+
+            newData.teamWebhook = changes.teamWebhook;
+            data.teamWebhook = changes.teamWebhook;
         }
 
         if ("deleteProfile" in changes) {
@@ -574,6 +602,8 @@ async function saveBot(userId, changes, updateVersion) {
             inCacheValue.saveUsername = data.saveUsername;
             inCacheValue.saveDrip = data.saveDrip;
             inCacheValue.deleteProfile = data.deleteProfile;
+            inCacheValue.teamQuery = data.teamQuery;
+            inCacheValue.teamWebhook = data.teamWebhook;
             inCacheValue.nobot = data.nobot;
             inCacheValue.version = data.version;
             inCacheValue.id = id;
@@ -585,6 +615,8 @@ async function saveBot(userId, changes, updateVersion) {
                 saveUsername: data.saveUsername,
                 saveDrip: data.saveDrip,
                 deleteProfile: data.deleteProfile,
+                teamQuery: data.teamQuery,
+                teamWebhook: data.teamWebhook,
                 nobot: data.nobot,
                 version: data.version,
                 id: id
@@ -618,6 +650,34 @@ async function getTournamentTeam(userId) {
     } else {
         return null;
     }
+}
+
+async function getAllTournamentTeams(tournament) {
+    var query = db.collection("tournamentteams");
+
+    if (tournament && typeof(tournament) === "string") {
+        query = query.where('tournament', '=', tournament);
+    }
+
+    var ref = await query;
+    var docs = await ref.get();
+
+    const teams = [];
+
+    if (docs) {
+        docs.forEach(element => {
+            var team = element.data();
+
+            teams.push({
+                team: team.team,
+                captain: team.captain,
+                name: team.name,
+                tournament: team.tournament
+            });
+        });
+    }
+
+    return teams;
 }
 
 function sanitizeTournamentChoice(tournament) {
@@ -799,5 +859,6 @@ module.exports = {
     saveTournamentTeam,
     deleteTournamentTeam,
     leaveTournamentTeam,
-    validateTournamentUser
+    validateTournamentUser,
+    getAllTournamentTeams
 };
