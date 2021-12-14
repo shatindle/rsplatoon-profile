@@ -89,18 +89,17 @@
 						<div class="col-12 col-md-8 offset-md-2">
 							<h4>Tournament</h4>
 							<p>
-								There will be two tournaments available on <b>January 8, 2022</b>: a <b>Casual</b> tournament and a <b>Competitive</b> tournament.  
+								There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
 								<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
 								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
-								The Casual tournament will be in the morning US Eastern time while the Competitive tournament will be in the afternoon US Eastern time.
 								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
 								Your team may only participate in one tournament.  Choose your tournament below.
 							</p>
 							<div>
 								<select name="tournament" class="form-control" <%= (tournamentTeam.team[0].userId === id) ? "" : "disabled" %>>
 									<option value="">Select a Tournament</option>
-									<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual</option>
-									<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive</option>
+									<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual January 8</option>
+									<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive January 9</option>
 								</select>
 							</div>
 						</div>
@@ -215,18 +214,17 @@
 						<div class="col-12 col-md-8 offset-md-2">
 							<h4>Tournament</h4>
 							<p>
-								There will be two tournaments available: a <b>Casual</b> tournament and a <b>Competitive</b> tournament.  
-								<span style="text-decoration: underline;">Anyone can participate in the Competitive tournament.</span>
+								There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
+								<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
 								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
-								The Casual tournament will be in the morning US Eastern time while the Competitive tournament will be in the afternoon US Eastern time.
 								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
 								Your team may only participate in one tournament.  Choose your tournament below.
 							</p>
 							<div>
 								<select name="tournament" class="form-control">
 									<option value="">Select a Tournament</option>
-									<option value="casual">Casual</option>
-									<option value="competitive">Competitive</option>
+									<option value="casual">Casual January 8</option>
+									<option value="competitive">Competitive January 9</option>
 								</select>
 							</div>
 						</div>
