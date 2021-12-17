@@ -1,5 +1,6 @@
 const Firestore = require('@google-cloud/firestore');
 const idApi = require('./idApi');
+const webhookApi = require("./webhookApi");
 
 const db = new Firestore({
     projectId: 'rsplatoon-discord',
@@ -8,6 +9,8 @@ const db = new Firestore({
 
 const userCache = [];
 const botCache = [];
+const webhookCache = {};
+var webhookLoaded = false;
 
 const metrics = {
     calls: 1,
@@ -732,6 +735,7 @@ async function validateTournamentUser(userId) {
 async function saveTournamentTeam(userId, team, captain, name, tournament) {
     var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
     var docs = await ref.get();
+    const endpoints = await loadTeamWebhooksAsArray();
 
     if (docs && docs.size === 0) {
         if (!name)
@@ -750,6 +754,14 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
                 createdOn: Firestore.Timestamp.now(),
                 updatedOn: Firestore.Timestamp.now()
             });
+
+            for (var i = 0; i < endpoints.length; i++) {
+                await webhookApi.teamCreated(endpoints[i], {
+                    team,
+                    captain,
+                    name
+                });
+            }
         }
 
         return result;
@@ -797,6 +809,14 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
             await element.ref.set(newData, { merge: true });
         });
 
+        for (var i = 0; i < endpoints.length; i++) {
+            await webhookApi.teamUpdated(endpoints[i], {
+                team: data.team,
+                captain: data.captain,
+                name: data.name
+            });
+        }
+
         await delay(1000);
 
         return;
@@ -836,12 +856,88 @@ async function delay(t, val) {
 async function deleteTournamentTeam(userId) {
     var ref = await db.collection("tournamentteams").where('captain', '=', userId);
     var docs = await ref.get();
+    const endpoints = await loadTeamWebhooksAsArray();
+
+    var data = null;
 
     docs.forEach(async element => {
+        data = element.data();
         await element.ref.delete();
     });
 
+    for (var i = 0; i < endpoints.length; i++) {
+        await webhookApi.teamDeleted(endpoints[i], {
+            team: data.team,
+            captain: data.captain,
+            name: data.name
+        });
+    }
+
     await delay(1000);
+}
+
+async function loadTeamWebhooks() {
+    // TODO: if a webhook no longer has the bot get perms, remove it
+    const final = {};
+
+    if (webhookLoaded) {
+        Object.keys(webhookCache).forEach(key => {
+            final[key] = webhookCache[key];
+        });
+
+        return final;
+    }
+
+    var ref = await db.collection("teamwebhooks");
+    var docs = await ref.get();
+
+    if (docs.size > 0) {
+        docs.forEach(e => {
+            var data = e.data();
+
+            webhookCache[data.userId] = data.url;
+            final[data.userId] = data.url;
+        });
+    }
+
+    webhookLoaded = true;
+
+    return final;
+}
+
+async function loadTeamWebhooksAsArray() {
+    const final = [];
+
+    const teams = await loadTeamWebhooks();
+
+    Object.keys(teams).forEach(key => {
+        final.push(teams[key]);
+    });
+
+    return final;
+}
+
+async function saveTeamWebhook(userId, url) {
+    var webhookRef = await db.collection("teamwebhooks").doc(userId);
+    
+    await webhookRef.set({
+        userId: userId,
+        url: url
+    });
+
+    webhookCache[userId] = url;
+}
+
+async function deleteTeamWebhook(userId) {
+    var ref = await db.collection("teamwebhooks").doc(userId);
+    var docs = await ref.get();
+
+    if (docs.exists) {
+        await ref.delete();
+    }
+
+    if (webhookCache[userId])
+        delete webhookCache[userId];
 }
 
 module.exports = {
@@ -860,5 +956,9 @@ module.exports = {
     deleteTournamentTeam,
     leaveTournamentTeam,
     validateTournamentUser,
-    getAllTournamentTeams
+    getAllTournamentTeams,
+
+    loadTeamWebhooks,
+    saveTeamWebhook,
+    deleteTeamWebhook
 };

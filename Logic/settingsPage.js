@@ -15,6 +15,8 @@ async function settingsPage(req, res, next) {
 
     const botkey = await databaseApi.getUserBotByUserId(req.session.userId);
 
+    const webhooks = await databaseApi.loadTeamWebhooks();
+
     const admin = isAdmin(req.session.userId);
 
     var allbots = [];
@@ -31,6 +33,8 @@ async function settingsPage(req, res, next) {
         loginUrl: appSettings.loginUrl, 
         profileId: userData ? userData.id : "",
         botKey: botkey ? botkey.id : "",
+        teamWebhookAllowed: botkey ? botkey.teamWebhook : false,
+        teamWebhookUrl: botkey && botkey.teamWebhook && webhooks[req.session.userId] ? webhooks[req.session.userId] : "",
         botData: botkey ? botkey : {},
         isAdmin: admin,
         allbots: allbots
@@ -109,6 +113,31 @@ async function revokeKeyPage(req, res, next) {
     return res.redirect('/settings');
 }
 
+async function setTeamWebhook(req, res, next) {
+    if (!req.session.userId)
+        return res.redirect('/');
+
+    const botkey = await databaseApi.getUserBotByUserId(req.session.userId);
+
+    if (botkey.teamWebhook) {
+        if (req.body.webhook) {
+            let url;
+            
+            try {
+                url = new URL(req.body.webhook);
+                await databaseApi.saveTeamWebhook(req.session.userId, req.body.webhook);
+            } catch (_) {
+                return false;  
+            }
+            
+        } else {
+            await databaseApi.deleteTeamWebhook(req.session.userId);
+        }
+
+        return res.redirect('/settings');
+    }
+}
+
 /**
  * @description Setup function for this route
  * @param {express.Express} app The express app
@@ -119,6 +148,7 @@ async function revokeKeyPage(req, res, next) {
     app.post('/settings/grantkey', grantKeyPage);
     app.post('/settings/resetkey', resetKeyPage);
     app.post('/settings/revokekey', revokeKeyPage);
+    app.post('/settings/saveteamwebhook', setTeamWebhook);
 }
 
 module.exports = {

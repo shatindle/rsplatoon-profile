@@ -215,7 +215,7 @@
 					</div>
 				<% } %>
 				<% if (botKey) { %>
-					<div class="row">
+					<div class="row" style="margin-top:14px;">
 						<div class="col-11">
 							<form>
 								<label for="copy-input">Your Bot Key</label>
@@ -245,6 +245,22 @@
 							</form>
 						</div>
 					</div>
+					<% if (teamWebhookAllowed) { %>
+						<form action="/settings/saveteamwebhook" method="post" id="save-form">
+							<div class="row" style="margin-top:14px;">
+									<div class="col">
+										<label for="copy-input">Team Webhook</label>
+										<input type="text" class="form-control" name="webhook" value="<%= teamWebhookUrl %>" id="webhook" placeholder="Your webhook URL" />
+									</div>
+							</div>
+							<div class="row" style="margin-top:14px;">
+								
+								<div class="col">
+									<button class="btn btn-primary" type="submit" style="float:right;">Save Webhook</button>
+								</div>
+							</div>
+						</form>
+					<% } %>
 				<% } %>
 			</div>
 		</div>
