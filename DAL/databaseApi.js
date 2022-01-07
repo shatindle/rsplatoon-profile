@@ -1,6 +1,7 @@
 const Firestore = require('@google-cloud/firestore');
 const idApi = require('./idApi');
 const webhookApi = require("./webhookApi");
+const appSettings = require("../settings.json");
 
 const db = new Firestore({
     projectId: 'rsplatoon-discord',
@@ -733,11 +734,17 @@ async function validateTournamentUser(userId) {
 }
 
 async function saveTournamentTeam(userId, team, captain, name, tournament) {
+    if (!appSettings.tournament.active)
+        throw "The tournament is offline";
+
     var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
     var docs = await ref.get();
     const endpoints = await loadTeamWebhooksAsArray();
 
     if (docs && docs.size === 0) {
+        if (!appSettings.tournament.addTeam)
+            throw "new teams cannot be added";
+
         if (!name)
             name = "[No Name]";
 
@@ -771,14 +778,16 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
 
         var newData = {};
 
-        var data;
+        var data, somethingChanged;
 
         docs.forEach(e => data = e.data());
 
         if (data.captain !== captain)
             throw "Cannot modify another team";
 
-        if (Array.isArray(team)) {
+        if (Array.isArray(team) && appSettings.tournament.editTeamMembers) {
+            somethingChanged = true;
+
             var result = await validateTeam(captain, team);
 
             if (typeof (result) === "boolean" && result) {
@@ -789,7 +798,9 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
             }
         }
 
-        if (name) {
+        if (name && appSettings.tournament.changeTeamName) {
+            somethingChanged = true;
+
             if (name.length > 20) 
                 name = name.substring(0, 20);
 
@@ -797,7 +808,9 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
             newData.name = name;
         }
 
-        if (tournament) {
+        if (tournament && appSettings.tournament.changeTournament) {
+            somethingChanged = true;
+            
             tournament = sanitizeTournamentChoice(tournament);
             data.tournament = tournament;
             newData.tournament = tournament;
@@ -805,16 +818,18 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
 
         newData.updatedOn = Firestore.Timestamp.now();
 
-        docs.forEach(async element => {
-            await element.ref.set(newData, { merge: true });
-        });
-
-        for (var i = 0; i < endpoints.length; i++) {
-            await webhookApi.teamUpdated(endpoints[i], {
-                team: data.team,
-                captain: data.captain,
-                name: data.name
+        if (somethingChanged) {
+            docs.forEach(async element => {
+                await element.ref.set(newData, { merge: true });
             });
+
+            for (var i = 0; i < endpoints.length; i++) {
+                await webhookApi.teamUpdated(endpoints[i], {
+                    team: data.team,
+                    captain: data.captain,
+                    name: data.name
+                });
+            }
         }
 
         await delay(1000);
@@ -824,6 +839,9 @@ async function saveTournamentTeam(userId, team, captain, name, tournament) {
 }
 
 async function leaveTournamentTeam(userId) {
+    if (!appSettings.tournament.active || !appSettings.tournament.leaveTeam)
+        throw "Tournament team leaving is not allowed";
+
     var ref = await db.collection("tournamentteams").where('team', 'array-contains', userId);
     var docs = await ref.get();
 
@@ -854,6 +872,9 @@ async function delay(t, val) {
  }
 
 async function deleteTournamentTeam(userId) {
+    if (!appSettings.tournament.active || !appSettings.tournament.deleteTeam)
+        throw "Tournament signups are closed";
+
     var ref = await db.collection("tournamentteams").where('captain', '=', userId);
     var docs = await ref.get();
     const endpoints = await loadTeamWebhooksAsArray();

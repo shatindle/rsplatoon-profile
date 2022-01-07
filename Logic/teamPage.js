@@ -45,8 +45,6 @@ async function basePage(req, res, next) {
             if (user.id === tournamentTeam.captain)
                 teamData.captain = user.name;
         }
-
-        
     }
 
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -60,7 +58,8 @@ async function basePage(req, res, next) {
         baseUrl: appSettings.baseUrl,
         loginUrl: appSettings.loginUrl, 
         profileId: userData ? userData.id : "",
-        tournamentTeam: teamData
+        tournamentTeam: teamData,
+        tournamentState: appSettings.tournament
     });
     return;
 }
@@ -140,7 +139,8 @@ async function registerPage(req, res, next) {
     if (!req.session.userId)
         return res.redirect('/');
 
-    if (req.body.team) {
+    if (req.body.team || appSettings.tournament.active) {
+        
         var team = req.body.team.filter(n => n && n !== req.session.userId);
         var captain = req.session.userId;
 
@@ -166,19 +166,10 @@ async function leavePage(req, res, next) {
     if (!req.session.userId)
         return res.redirect('/');
 
-    await databaseApi.leaveTournamentTeam(req.session.userId);
+    if (appSettings.tournament.active && appSettings.tournament.leaveTeam)
+        await databaseApi.leaveTournamentTeam(req.session.userId);
 
     await basePage(req, res, next);
-}
-
-/**
- * @description Update your team members (you must be team captain)
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function to run if this one has nothing to do
- */
-async function updatePage(req, res, next) {
-
 }
 
 /**
@@ -191,7 +182,8 @@ async function deletePage(req, res, next) {
     if (!req.session.userId)
         return res.redirect('/');
         
-    await databaseApi.deleteTournamentTeam(req.session.userId);
+    if (appSettings.tournament.active && appSettings.tournament.deleteTeam)
+        await databaseApi.deleteTournamentTeam(req.session.userId);
 
     await basePage(req, res, next);
 }
@@ -206,7 +198,6 @@ async function deletePage(req, res, next) {
     app.get('/team*', teamPage);
     app.post('/team/register', registerPage);
     app.post('/team/leave', leavePage);
-    app.post('/team/update', updatePage);
     app.post('/team/delete', deletePage);
 }
 

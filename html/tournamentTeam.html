@@ -66,225 +66,256 @@
             <% } %>
 			<a class="btn btn-primary" href="/" role="button">Home</a>
 		</div>
-		<% if (tournamentTeam && tournamentTeam.team && tournamentTeam.team.length > 0) { %>
-			<form action="/team/register" method="post" onsubmit="return validateForm()">
-				<div class="container">
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h3><%= username %> is on:</h3>
-							<% if (tournamentTeam.team[0].userId === id) { %>
-								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" maxlength="20" />
-								<p>Choose a team name!  No more than 20 characters.</p>
-							<% } else { %>
-								<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" disabled />
-							<% } %>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h4>Team Captain: <%= tournamentTeam.captain %></h4>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h4>Tournament</h4>
-							<p>
-								There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
-								<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
-								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
-								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
-								Your team may only participate in one tournament.  Choose your tournament below.
-							</p>
-							<div>
-								<select name="tournament" class="form-control" <%= (tournamentTeam.team[0].userId === id) ? "" : "disabled" %>>
-									<option value="">Select a Tournament</option>
-									<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual January 8</option>
-									<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive January 9</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h3>Members</h3>
-							<p>
-								Please name 3-5 other players who will be on your team.  
-								You will only be able to register players who are not already on a team.
-								You are expected to confirm that these players want be on your team before you sign them up.
-								Failure to do so will disqualify you from participating in the tournaments.
-								You may search by username#0000 or by Discord ID.
-								<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
-							</p>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h3>Members</h3>
-						</div>
-					</div>
-					<% var first = true; %>
-					<% tournamentTeam.team.forEach(function (member) { %>
+		<% if (tournamentState.active) { %>
+			<% if (tournamentTeam && tournamentTeam.team && tournamentTeam.team.length > 0) { %>
+				<form action="/team/register" method="post" onsubmit="return validateForm()">
+					<div class="container">
 						<div class="row" style="margin-bottom: 14px;">
-							<div class="col-1 col-md-1 offset-md-2">
-								<% if (!first && tournamentTeam.team[0].userId === id) { %>
-								<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
-								<% } first = false; %>
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3><%= username %> is on:</h3>
+								<% if (tournamentTeam.team[0].userId === id && tournamentState.changeTeamName) { %>
+									<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" maxlength="20" />
+									<p>Choose a team name!  No more than 20 characters.</p>
+								<% } else { %>
+									<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" disabled />
+								<% } %>
 							</div>
-							<div class="col-2 col-md-1">
-								<img src="<%= member.avatar %>" style="width:50px;" />
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Team Captain: <%= tournamentTeam.captain %></h4>
 							</div>
-							<div class="col-9 col-md-6">
-								<h5 class="username">
-									<%= member.name %>
-								</h5>
-								<div class="userid">
-									<%= member.userId %>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Tournament</h4>
+								<p>
+									There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
+									<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
+									The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+									The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+									Your team may only participate in one tournament.  Choose your tournament below.
+								</p>
+								<div>
+									<select name="tournament" class="form-control" <%= (tournamentTeam.team[0].userId === id && tournamentState.changeTournament) ? "" : "disabled" %>>
+										<option value="">Select a Tournament</option>
+										<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual January 8</option>
+										<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive January 9</option>
+									</select>
 								</div>
-								
-								<input type="hidden" class="form-control userid-value" name="team[]" value="<%= member.userId %>" />
 							</div>
 						</div>
-					<% }); %>
-					<% for (var i = 0; i < 6 - tournamentTeam.team.length; i++) { %>
 						<div class="row" style="margin-bottom: 14px;">
-							<div class="col-1 col-md-1 offset-md-2 no-gutters">
-								<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
+								<p>
+									Please name 3-5 other players who will be on your team.  
+									You will only be able to register players who are not already on a team.
+									You are expected to confirm that these players want be on your team before you sign them up.
+									Failure to do so will disqualify you from participating in the tournaments.
+									You may search by username#0000 or by Discord ID.
+									<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+								</p>
 							</div>
-							<div class="col-2 col-md-1 no-gutters">
-								<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
 							</div>
-							<div class="col-9 col-md-6 no-gutters">
-								<div class="input-group">
-									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
-									<div class="input-group-append">
-										<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+						</div>
+						<% var first = true; %>
+						<% tournamentTeam.team.forEach(function (member) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-1 col-md-1 offset-md-2">
+									<% if (!first && tournamentTeam.team[0].userId === id && tournamentState.editTeamMembers) { %>
+									<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
+									<% } first = false; %>
+								</div>
+								<div class="col-2 col-md-1">
+									<img src="<%= member.avatar %>" style="width:50px;" />
+								</div>
+								<div class="col-9 col-md-6">
+									<h5 class="username">
+										<%= member.name %>
+									</h5>
+									<div class="userid">
+										<%= member.userId %>
+									</div>
+									
+									<input type="hidden" class="form-control userid-value" name="team[]" value="<%= member.userId %>" />
+								</div>
+							</div>
+						<% }); %>
+						<% if (tournamentState.editTeamMembers) { %>
+							<% for (var i = 0; i < 6 - tournamentTeam.team.length; i++) { %>
+								<div class="row" style="margin-bottom: 14px;">
+									<div class="col-1 col-md-1 offset-md-2 no-gutters">
+										<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+									</div>
+									<div class="col-2 col-md-1 no-gutters">
+										<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+									</div>
+									<div class="col-9 col-md-6 no-gutters">
+										<div class="input-group">
+											<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+											<div class="input-group-append">
+												<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							<% } %>
+						<% } %>
+						<% if (tournamentTeam.team[0].userId === id) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-12 col-md-8 offset-md-2">
+									<div class="float-left">
+										<% if (tournamentState.deleteTeam) { %>
+											<button type="button" class="btn btn-danger delete-team">Delete Team</button>
+										<% } %>
+									</div>
+									<div class="float-right">
+										<button type="submit" class="btn btn-primary" disabled>Submit</button>
 									</div>
 								</div>
 							</div>
-						</div>
-					<% } %>
-					<% if (tournamentTeam.team[0].userId === id) { %>
+
+							<% if (tournamentState.deleteTeam) { %>
+								<script>
+									$(document).ready(function() {
+										$(".delete-team").click(function() {
+											if (confirm("You are about to delete your current team.  Are you sure?")) {
+												$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
+											}
+										});
+									});
+								</script>
+							<% } %>
+						<% } else if (tournamentState.leaveTeam) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-12 col-md-8 offset-md-2">
+									<div class="float-right">
+										<button type="button" class="btn btn-danger leave-team">Leave Team</button>
+									</div>
+								</div>
+							</div>
+						<% } %>
+					</div>
+				</form>
+			<% } else if (tournamentState.addTeam) { %>
+				<form action="/team/register" method="post" onsubmit="return validateForm()">
+					<div class="container">
 						<div class="row" style="margin-bottom: 14px;">
 							<div class="col-12 col-md-8 offset-md-2">
-								<div class="float-left">
-									<button type="button" class="btn btn-danger delete-team">Delete Team</button>
+								<h2>Register a team</h2>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Team Name</h3>
+								<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" maxlength="20" />
+								<p>Choose a team name!  No more than 20 characters.</p>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Tournament</h4>
+								<p>
+									There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
+									<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
+									The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+									The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+									Your team may only participate in one tournament.  Choose your tournament below.
+								</p>
+								<div>
+									<select name="tournament" class="form-control">
+										<option value="">Select a Tournament</option>
+										<option value="casual">Casual January 8</option>
+										<option value="competitive">Competitive January 9</option>
+									</select>
 								</div>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
+								<p>
+									Please name 3-5 other players who will be on your team.  
+									You will only be able to register players who are not already on a team.
+									You are expected to confirm that these players want be on your team before you sign them up.
+									Failure to do so will disqualify you from participating in the tournaments.
+									You may search by username#0000 or by Discord ID.
+									<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+								</p>
+							</div>
+						</div>
+						<div class="row no-gutters" style="margin-bottom: 14px;">
+							<div class="col-1 col-md-1 offset-md-2 no-gutters"></div>
+							<div class="col-2 col-md-1 no-gutters">
+								<img src="<%= avatar %>" style="width:100%; max-width:50px;" />
+							</div>
+							<div class="col-9 col-md-6 no-gutters">
+								<h5 class="username">
+									<%= username %>
+								</h5>
+								<div class="userid">
+									<%= id %>
+								</div>
+								
+								<input type="hidden" class="form-control userid-value" name="team[]" value="<%= id %>" />
+							</div>
+						</div>
+						<% for (var i = 0; i < 5; i++) { %>
+							<div class="row no-gutters" style="margin-bottom: 14px;">
+								<div class="col-1 col-md-1 offset-md-2 no-gutters">
+									<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+								</div>
+								<div class="col-2 col-md-1 no-gutters">
+									<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+								</div>
+								<div class="col-9 col-md-6 no-gutters">
+									<div class="input-group">
+										<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+										<div class="input-group-append">
+											<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						<% } %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
 								<div class="float-right">
 									<button type="submit" class="btn btn-primary" disabled>Submit</button>
 								</div>
 							</div>
 						</div>
-
-						<script>
-							$(document).ready(function() {
-								$(".delete-team").click(function() {
-									if (confirm("You are about to delete your current team.  Are you sure?")) {
-										$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
-									}
-								});
-							});
-						</script>
-					<% } else { %>
-						<div class="row" style="margin-bottom: 14px;">
-							<div class="col-12 col-md-8 offset-md-2">
-								<div class="float-right">
-									<button type="button" class="btn btn-danger leave-team">Leave Team</button>
-								</div>
-							</div>
-						</div>
-					<% } %>
-				</div>
-			</form>
-		<% } else { %>
-			<form action="/team/register" method="post" onsubmit="return validateForm()">
+					</div>
+				</form>
+			<% } else { %>
 				<div class="container">
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h2>Register a team</h2>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h3>Team Name</h3>
-							<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" maxlength="20" />
-							<p>Choose a team name!  No more than 20 characters.</p>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h4>Tournament</h4>
+					<div class="row">
+						<div class="col">
+							<h3>Tournament signups are closed!</h3>
 							<p>
-								There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
-								<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
-								The Casual tournament will be restricted to only those who have not participated in major tournaments before.
-								The Competitive tournament will have a monetary prize to be split amongst the winning teams.
-								Your team may only participate in one tournament.  Choose your tournament below.
+								Thank you for your interest. Watch <a href="https://www.twitch.tv/brian_x7" target="_blank">the Casual and Competitive tournament streams</a>!  
+								They will be live from 11AM-3PM ET January 8 and 9, 2022.  Want to participat in future events like tournaments and splatfests?  
+								Join <a href="https://discord.gg/rsplatoon" target="_blank">the r/Splatoon Discord Server</a> and <a href="https://discord.gg/inkling" target="_blank">the Inklingcord Discord Server</a> 
+								and be on the lookout for future events!
 							</p>
-							<div>
-								<select name="tournament" class="form-control">
-									<option value="">Select a Tournament</option>
-									<option value="casual">Casual January 8</option>
-									<option value="competitive">Competitive January 9</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<h3>Members</h3>
-							<p>
-								Please name 3-5 other players who will be on your team.  
-								You will only be able to register players who are not already on a team.
-								You are expected to confirm that these players want be on your team before you sign them up.
-								Failure to do so will disqualify you from participating in the tournaments.
-								You may search by username#0000 or by Discord ID.
-								<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
-							</p>
-						</div>
-					</div>
-					<div class="row no-gutters" style="margin-bottom: 14px;">
-						<div class="col-1 col-md-1 offset-md-2 no-gutters"></div>
-						<div class="col-2 col-md-1 no-gutters">
-							<img src="<%= avatar %>" style="width:100%; max-width:50px;" />
-						</div>
-						<div class="col-9 col-md-6 no-gutters">
-							<h5 class="username">
-								<%= username %>
-							</h5>
-							<div class="userid">
-								<%= id %>
-							</div>
-							
-							<input type="hidden" class="form-control userid-value" name="team[]" value="<%= id %>" />
-						</div>
-					</div>
-					<% for (var i = 0; i < 5; i++) { %>
-						<div class="row no-gutters" style="margin-bottom: 14px;">
-							<div class="col-1 col-md-1 offset-md-2 no-gutters">
-								<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
-							</div>
-							<div class="col-2 col-md-1 no-gutters">
-								<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
-							</div>
-							<div class="col-9 col-md-6 no-gutters">
-								<div class="input-group">
-									<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
-									<div class="input-group-append">
-										<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					<% } %>
-					<div class="row" style="margin-bottom: 14px;">
-						<div class="col-12 col-md-8 offset-md-2">
-							<div class="float-right">
-								<button type="submit" class="btn btn-primary" disabled>Submit</button>
-							</div>
 						</div>
 					</div>
 				</div>
-			</form>
+			<% } %>
+		<% } else { %>
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<h3>The tournament is over!</h3>
+						<p>Thank you for your interest. Check out <a href="https://discord.gg/rsplatoon" target="_blank">the r/Splatoon Discord Server</a> and be on the lookout for future events!</p>
+					</div>
+				</div>
+			</div>
 		<% } %>
 		<script>
 			$(document).ready(function() {
