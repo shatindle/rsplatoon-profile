@@ -91,6 +91,19 @@ async function rootPage(req, res, next) {
 }
 app.get('/', rootPage);
 
+function cleanFriendCode(friendcode) {
+    friendcode = friendcode.replace(/(\r\n|\n|\r)/gm, "");
+    friendcode = friendcode.replace(/\D/g,'');
+    let tempfriendcode = "";
+    // 0123-4567-8901
+    for (var i = 0; i < friendcode.length; i++) {
+        tempfriendcode += friendcode[i];
+        if (i === 3 || i === 7)
+            tempfriendcode += "-";
+    }
+    return tempfriendcode;
+}
+
 async function savePage(req, res, next) {
     try {
         if (req.session.userId) {
@@ -100,7 +113,7 @@ async function savePage(req, res, next) {
             if (req.body.friendcode || req.body.name || req.body.template || req.body.version) {
                 if (req.body.friendcode) {
                     // validate friend code
-                    req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
+                    req.body.friendcode = cleanFriendCode(req.body.friendcode);
                     if (!req.body.friendcode.match(/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}$/)) {
                         throw "Invalid friend code";
                     }
@@ -143,7 +156,7 @@ async function savePage(req, res, next) {
                 ) {
                     if (req.body.friendcode) {
                         // validate friend code
-                        req.body.friendcode = req.body.friendcode.replace(/(\r\n|\n|\r)/gm, "");
+                        req.body.friendcode = cleanFriendCode(req.body.friendcode);
                         if (!req.body.friendcode.match(/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}$/)) {
                             return res.send({
                                 result: "Invalid friend code"
