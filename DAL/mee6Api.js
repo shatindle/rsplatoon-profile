@@ -1,13 +1,13 @@
 const fetch = require("node-fetch");
 const appSettings = require("../settings.json");
 
-const mee6Url = "https://mee6.xyz/api/plugins/levels/leaderboard/421449065704980480?limit=1000&page=";
+const mee6Url = "https://mee6.xyz/api/plugins/levels/leaderboard/ID?limit=1000&page=";
 
 const userListByServer = {};
 
 
-setTimeout(refreshCache, 5000);
-const refreshCacheInterval = setInterval(refreshCache, 86400000);
+//setTimeout(refreshCache, 5000);
+//const refreshCacheInterval = setInterval(refreshCache, 86400000);
 
 async function refreshCache() {
     if (appSettings.otherServers && appSettings.otherServers.length) {
