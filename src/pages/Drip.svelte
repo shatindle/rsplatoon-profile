@@ -74,11 +74,11 @@
             processData: false,
             type: 'POST',
             success: function() {
-                location.reload();
+                window.location.reload();
             },
             error: function() {
                 alert("Upload failed");
-                location.reload();
+                window.location.reload();
             }
         });
     }
