@@ -4,8 +4,10 @@
   "description": "Profiles for r/Splatoon users",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c",
+    "dev:client": "rollup -c -w --dev",
+    "dev:server": "node server/server.js --dev",
+    "start": "run-p dev:client dev:server"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,18 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "json2csv": "^5.0.6"
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-replace": "^3.0.1",
+    "@sveltejs/kit": "^1.0.0-next.1",
+    "json2csv": "^5.0.6",
+    "npm-run-all": "^4.1.5",
+    "rollup": "^2.66.1",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-svelte": "^7.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "svelte": "^3.46.3",
+    "svelte-routing": "^1.6.0"
   }
 }

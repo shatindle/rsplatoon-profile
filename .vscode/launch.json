@@ -5,22 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "name": "Server Only",
+            "type": "node",
             "request": "launch",
-            "name": "Launch Site",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\server.js"
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "start"]
         },
         {
-            "type": "pwa-node",
+            "type": "pwa-chrome",
             "request": "launch",
-            "name": "Save Teams",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\tournamentTeamList.js"
+            "name": "Browser",
+            "url": "http://localhost",
+            "webRoot": "${workspaceFolder}/src"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Watch Breakpoints",
+            "configurations": ["Server Only", "Browser"]
         }
     ]
 }

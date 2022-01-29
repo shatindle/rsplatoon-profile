@@ -1,0 +1,458 @@
+<!-- TODO: convert this page -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>r/Splatoon Profile</title>
+	<meta http-equiv="Content-Security-Policy" content="default-src * gap: data: blob: 'unsafe-inline' 'unsafe-eval' ws: wss:;">
+
+	<meta name="description" content="r/Splatoon profile pages - share your friend code and game stats!">
+	<meta name="keywords" content="Splatoon, r/Splatoon, friend code, profile">
+	<meta name="author" content="shane#1353">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/fav/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/fav/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/fav/favicon-16x16.png">
+	<link rel="manifest" href="/fav/site.webmanifest">
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="/css/root.css">
+</head>
+<body>
+	<div class="container" style="margin-bottom:100px;padding-left:0;padding-right:0;">
+		<div class="jumbotron jumbotron-splatoff">
+			<div>
+				<a href="#">
+					<img class="center-block" src="/css/img/logo-splatoff.png" style="width:300px;height:auto;margin-top:0"/>
+				</a>
+				<h1>Team Signup</h1>
+			</div>
+            <% if (id) { %>
+				<div id="userinfo">
+					<div class="usermenu" style="display: none;">
+						<div style="height:70px;width:1px;"></div>
+						<div class="item">
+							<a href="/settings">
+								Settings
+							</a>
+						</div>
+						<div class="item">
+							<form action="/delete" method="post">
+								<input type="hidden" name="delete" value="YES" />
+								<a href="#" onclick="$(this).closest('form').submit();return false;">
+									Delete Profile
+								</a>
+							</form>
+						</div>
+						<div class="item">
+							<a href="/logout">
+								Logout
+							</a>
+						</div>
+					</div>
+					<img src="<%= avatar %>" onclick="toggleusermenu()" />
+					<script>
+						function toggleusermenu() {
+							$(".usermenu").slideToggle();
+						}
+					</script>
+				</div>
+            <% } %>
+			<a class="btn btn-primary" href="/" role="button">Home</a>
+		</div>
+		<% if (tournamentState.active) { %>
+			<% if (tournamentTeam && tournamentTeam.team && tournamentTeam.team.length > 0) { %>
+				<form action="/team/register" method="post" onsubmit="return validateForm()">
+					<div class="container">
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3><%= username %> is on:</h3>
+								<% if (tournamentTeam.team[0].userId === id && tournamentState.changeTeamName) { %>
+									<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" maxlength="20" />
+									<p>Choose a team name!  No more than 20 characters.</p>
+								<% } else { %>
+									<input type="text" class="form-control" name="name" value="<%= tournamentTeam.name %>" id="name" placeholder="Team Name" disabled />
+								<% } %>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Team Captain: <%= tournamentTeam.captain %></h4>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Tournament</h4>
+								<p>
+									There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
+									<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
+									The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+									The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+									Your team may only participate in one tournament.  Choose your tournament below.
+								</p>
+								<div>
+									<select name="tournament" class="form-control" <%= (tournamentTeam.team[0].userId === id && tournamentState.changeTournament) ? "" : "disabled" %>>
+										<option value="">Select a Tournament</option>
+										<option value="casual" <%= (tournamentTeam.tournament === "casual") ? "selected" : "" %>>Casual January 8</option>
+										<option value="competitive" <%= (tournamentTeam.tournament === "competitive") ? "selected" : "" %>>Competitive January 9</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
+								<p>
+									Please name 3-5 other players who will be on your team.  
+									You will only be able to register players who are not already on a team.
+									You are expected to confirm that these players want be on your team before you sign them up.
+									Failure to do so will disqualify you from participating in the tournaments.
+									You may search by username#0000 or by Discord ID.
+									<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+								</p>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
+							</div>
+						</div>
+						<% var first = true; %>
+						<% tournamentTeam.team.forEach(function (member) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-1 col-md-1 offset-md-2">
+									<% if (!first && tournamentTeam.team[0].userId === id && tournamentState.editTeamMembers) { %>
+									<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
+									<% } first = false; %>
+								</div>
+								<div class="col-2 col-md-1">
+									<img src="<%= member.avatar %>" style="width:50px;" />
+								</div>
+								<div class="col-9 col-md-6">
+									<h5 class="username">
+										<%= member.name %>
+									</h5>
+									<div class="userid">
+										<%= member.userId %>
+									</div>
+									
+									<input type="hidden" class="form-control userid-value" name="team[]" value="<%= member.userId %>" />
+								</div>
+							</div>
+						<% }); %>
+						<% if (tournamentState.editTeamMembers) { %>
+							<% for (var i = 0; i < 6 - tournamentTeam.team.length; i++) { %>
+								<div class="row" style="margin-bottom: 14px;">
+									<div class="col-1 col-md-1 offset-md-2 no-gutters">
+										<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+									</div>
+									<div class="col-2 col-md-1 no-gutters">
+										<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+									</div>
+									<div class="col-9 col-md-6 no-gutters">
+										<div class="input-group">
+											<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+											<div class="input-group-append">
+												<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							<% } %>
+						<% } %>
+						<% if (tournamentTeam.team[0].userId === id) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-12 col-md-8 offset-md-2">
+									<div class="float-left">
+										<% if (tournamentState.deleteTeam) { %>
+											<button type="button" class="btn btn-danger delete-team">Delete Team</button>
+										<% } %>
+									</div>
+									<div class="float-right">
+										<button type="submit" class="btn btn-primary" disabled>Submit</button>
+									</div>
+								</div>
+							</div>
+
+							<% if (tournamentState.deleteTeam) { %>
+								<script>
+									$(document).ready(function() {
+										$(".delete-team").click(function() {
+											if (confirm("You are about to delete your current team.  Are you sure?")) {
+												$('<form action="/team/delete" method="POST"></form>').appendTo("body").submit();
+											}
+										});
+									});
+								</script>
+							<% } %>
+						<% } else if (tournamentState.leaveTeam) { %>
+							<div class="row" style="margin-bottom: 14px;">
+								<div class="col-12 col-md-8 offset-md-2">
+									<div class="float-right">
+										<button type="button" class="btn btn-danger leave-team">Leave Team</button>
+									</div>
+								</div>
+							</div>
+						<% } %>
+					</div>
+				</form>
+			<% } else if (tournamentState.addTeam) { %>
+				<form action="/team/register" method="post" onsubmit="return validateForm()">
+					<div class="container">
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h2>Register a team</h2>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Team Name</h3>
+								<input type="text" class="form-control" name="name" value="" id="name" placeholder="Team Name" maxlength="20" />
+								<p>Choose a team name!  No more than 20 characters.</p>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h4>Tournament</h4>
+								<p>
+									There will be two tournaments.  The Casual tournament will take place <b>January 8, 2022 from 11 AM to 3 PM US ET</b>.  The Competitive tournament will take place <b>January 9, 2022 from 11 AM to 3 PM US ET</b>.  
+									<span style="text-decoration: underline;">Anyone can participate in the <b>Competitive</b> tournament.</span>
+									The Casual tournament will be restricted to only those who have not participated in major tournaments before.
+									The Competitive tournament will have a monetary prize to be split amongst the winning teams.
+									Your team may only participate in one tournament.  Choose your tournament below.
+								</p>
+								<div>
+									<select name="tournament" class="form-control">
+										<option value="">Select a Tournament</option>
+										<option value="casual">Casual January 8</option>
+										<option value="competitive">Competitive January 9</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<h3>Members</h3>
+								<p>
+									Please name 3-5 other players who will be on your team.  
+									You will only be able to register players who are not already on a team.
+									You are expected to confirm that these players want be on your team before you sign them up.
+									Failure to do so will disqualify you from participating in the tournaments.
+									You may search by username#0000 or by Discord ID.
+									<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-" target="_blank">How to get a user's Discord ID</a>
+								</p>
+							</div>
+						</div>
+						<div class="row no-gutters" style="margin-bottom: 14px;">
+							<div class="col-1 col-md-1 offset-md-2 no-gutters"></div>
+							<div class="col-2 col-md-1 no-gutters">
+								<img src="<%= avatar %>" style="width:100%; max-width:50px;" />
+							</div>
+							<div class="col-9 col-md-6 no-gutters">
+								<h5 class="username">
+									<%= username %>
+								</h5>
+								<div class="userid">
+									<%= id %>
+								</div>
+								
+								<input type="hidden" class="form-control userid-value" name="team[]" value="<%= id %>" />
+							</div>
+						</div>
+						<% for (var i = 0; i < 5; i++) { %>
+							<div class="row no-gutters" style="margin-bottom: 14px;">
+								<div class="col-1 col-md-1 offset-md-2 no-gutters">
+									<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+								</div>
+								<div class="col-2 col-md-1 no-gutters">
+									<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+								</div>
+								<div class="col-9 col-md-6 no-gutters">
+									<div class="input-group">
+										<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+										<div class="input-group-append">
+											<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						<% } %>
+						<div class="row" style="margin-bottom: 14px;">
+							<div class="col-12 col-md-8 offset-md-2">
+								<div class="float-right">
+									<button type="submit" class="btn btn-primary" disabled>Submit</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			<% } else { %>
+				<div class="container">
+					<div class="row">
+						<div class="col">
+							<h3>Tournament signups are closed!</h3>
+							<p>
+								Thank you for your interest. Watch <a href="https://www.twitch.tv/brian_x7" target="_blank">the Casual and Competitive tournament streams</a>!  
+								They will be live from 11AM-3PM ET January 8 and 9, 2022.  Want to participat in future events like tournaments and splatfests?  
+								Join <a href="https://discord.gg/rsplatoon" target="_blank">the r/Splatoon Discord Server</a> and <a href="https://discord.gg/inkling" target="_blank">the Inklingcord Discord Server</a> 
+								and be on the lookout for future events!
+							</p>
+						</div>
+					</div>
+				</div>
+			<% } %>
+		<% } else { %>
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<h3>The tournament is over!</h3>
+						<p>Thank you for your interest. Check out <a href="https://discord.gg/rsplatoon" target="_blank">the r/Splatoon Discord Server</a> and be on the lookout for future events!</p>
+					</div>
+				</div>
+			</div>
+		<% } %>
+		<script>
+			$(document).ready(function() {
+				var nouserhtml = `<div class="col-1 col-md-1 offset-md-2 no-gutters">
+					<button class="btn btn-primary float-center" type="button" style="margin-top:auto;margin-bottom:auto;display:none;"><i class="fa fa-close"></i></button>
+				</div>
+				<div class="col-2 col-md-1 no-gutters">
+					<img src="/css/img/blackpixel.png" style="width:100%;max-width: 50px;" />
+				</div>
+				<div class="col-9 col-md-6 no-gutters">
+					<div class="input-group">
+						<input type="text" class="form-control discord-search-text" name="team[]" value="" placeholder="User" />
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary discord-search" type="button">Search</button>
+						</div>
+					</div>
+				</div>`;
+				var newrowhtml = `<div class="col-1 col-md-1 offset-md-2">
+						<button class="btn btn-primary remove-user" type="button" style="margin-top:auto;margin-bottom:auto;"><i class="fa fa-close"></i></button>
+					</div>
+					<div class="col-2 col-md-1">
+						<img class="user-avatar" src="" style="width:50px;" />
+					</div>
+					<div class="col-6">
+						<h5 class="username"></h5>
+						<div class="userid"></div>
+						
+						<input type="hidden" class="form-control userid-value" name="team[]" value="" />
+					</div>`;
+
+				function deleteRow() {
+					var button = $(this);
+					var row = button.closest(".row");
+					var useridvalue = row.find(".userid-value").val();
+
+					row.empty();
+
+					row.append(nouserhtml);
+
+					row.find(".discord-search").click(discordSearch);
+
+					$("button[type=submit]").prop("disabled", false);
+				}
+
+				function discordSearch() {
+					var button = $(this);
+					var row = button.closest(".row");
+					var input = row.find(".discord-search-text");
+
+					var newrow = $(newrowhtml);
+					var founduser = newrow.find(".user-found");
+					var avatar = newrow.find(".user-avatar");
+					var username = newrow.find(".username");
+					var userid = newrow.find(".userid");
+					var useridvalue = newrow.find(".userid-value");
+					$.ajax({
+						url: "/team/find/user",
+						type: "get",
+						data: $.param({
+							search: input.val()
+						}),
+						success: function(data) {
+							if (data) {
+								if (typeof(data) === "string") {
+									alert("Error: " + data + ".  If you believe this is an error, please have them reach out to the event organizers.");
+
+									input.val("");
+								} else if (data.length === 1) {
+									var exists = false;
+								
+									$(".userid-value").each(function() {
+										if ($(this).val() === data[0].id)
+											exists = true;
+									});
+
+									if (!exists) {
+										row.empty();
+
+										username.text(data[0].name);
+										userid.text(data[0].id);
+										useridvalue.val(data[0].id);
+										avatar.attr("src", data[0].avatar);
+
+										newrow.find(".remove-user").click(deleteRow);
+
+										row.append(newrow);
+
+										$("button[type=submit]").prop("disabled", false);
+
+										return;
+									} else {
+										alert("This user is already on your team");
+
+										input.val("");
+									}
+								} else {
+									if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
+										window.open("https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-");
+									}
+
+									input.val("");
+								}
+							} else {
+								if (confirm("No exact match found.  Please try again or try by ID.\n\nHaving trouble finding someone by name?  They must be in r/Splatoon to search by username.  If they are not, you can still add them by ID.\n\nNeed help getting the user ID?  Click OK to open an article on how to lookup a user ID.")) {
+									window.open("https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-");
+								}
+							}
+						}
+					});
+				}
+
+				function leaveTeam() {
+					if (confirm("You are about to leave your current team.  Are you sure?")) {
+						$('<form action="/team/leave" method="POST"></form>').appendTo("body").submit();
+					}
+				}
+
+				$(".discord-search").click(discordSearch);
+				$(".remove-user").click(deleteRow);
+				$("input[name=name]").on("input", function() {
+					$("button[type=submit]").prop("disabled", false);
+				});
+				$("select[name=tournament]").change(function() {
+					$("button[type=submit]").prop("disabled", false);
+				});
+				$(".leave-team").click(leaveTeam);
+			});
+			
+			function validateForm() {
+				if ($(".userid-value").length < 4 || $(".userid-value").length > 6) {
+					alert("Teams must consist of 4-6 players.");
+					return false;
+				}
+			}
+		</script>
+	</div>
+</body>
+</html>

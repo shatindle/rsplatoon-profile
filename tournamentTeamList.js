@@ -1,5 +1,5 @@
-const databaseApi = require("./DAL/databaseApi");
-const discordApi = require("./DAL/discordApi");
+const databaseApi = require("./server/dal/databaseApi");
+const discordApi = require("./server/dal/discordApi");
 const { Parser } = require('json2csv');
 const fs = require('fs');
 
