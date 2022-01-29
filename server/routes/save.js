@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const databaseApi = require("../dal/databaseApi");
+const fetch = require("node-fetch");
+const cardApi = require("../dal/cardApi");
+const imgApi = require("../dal/imgApi");
 
 function cleanFriendCode(friendcode) {
     friendcode = friendcode.replace(/(\r\n|\n|\r)/gm, "");

@@ -34,3 +34,4 @@ jobs:
           npm install --only=prod
           pm2 stop profile
           cp -r $GITHUB_WORKSPACE/* /home/sha_tindle/repos/rsplatoon-profile
+          pm2 restart profile

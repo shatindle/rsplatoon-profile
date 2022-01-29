@@ -144,7 +144,7 @@
                 {/if}
             </div>
             <div class="col-12 col-md-6">
-                <form action="/save" method="post" id="save-form">
+                <form action="/api/save" method="post" id="save-form">
                     <div class="form-group">
                         <h3 for="name">Username</h3>
                         <input type="text" class="form-control" name="name" bind:value={userdata.name} id="name" placeholder="In game name" maxlength="10" />
