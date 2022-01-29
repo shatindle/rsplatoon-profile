@@ -29,7 +29,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           npm install
           npm audit fix || true
-          npm build
+          npm run build
           rm -rf $GITHUB_WORKSPACE/node_modules
           npm install --only=prod
           pm2 stop profile
