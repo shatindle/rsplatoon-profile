@@ -28,7 +28,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           npm install
-          npm audit fix
+          npm audit fix || true
           npm build
           rm -rf $GITHUB_WORKSPACE/node_modules
           npm install --only=prod
