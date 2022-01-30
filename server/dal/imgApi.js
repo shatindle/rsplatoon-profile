@@ -104,6 +104,45 @@ async function uploadCard(userId, img) {
     };
 }
 
+async function uploadTemplate(userId, slot, img, name, searchTerms, friendcodecolor, namecolor) {
+    const dimensions = sizeOf(img);
+
+    if (dimensions.width !== 1204)
+        throw "Image must be exactly 1204px in width";
+
+    if (dimensions.height !== 630)
+        throw "Image must be exactly 630px in height";
+
+    if (await databaseApi.canUpdate(userId)) {
+        await databaseApi.updateUserProfile(userId, {
+            uploadAttempt: true
+        });
+
+        var resp = await deepai.callStandardApi("nsfw-detector", {
+            image: img
+        });
+    
+        if (resp.output.nsfw_score > 0.6)
+            throw "Possible NSFW content: " + resp.output.nsfw_score;
+    
+        const response = await uploader.uploadBuffer(img);
+
+        const previousTemplate = await databaseApi.getTemplate(userId + "-" + slot);
+
+        const newTemplate = await databaseApi.updateTemplate(userId, slot, response.url, response.deleteHash, name, searchTerms, friendcodecolor, namecolor);
+
+        if (previousTemplate)
+            await deleteImage(previousTemplate.deleteHash);
+
+        return {
+            ...newTemplate
+        };
+    } else {
+        // user cannot upload an image right now
+        throw "UPLOAD LIMIT EXCEEDED";
+    }
+}
+
 /**
  * @description Deletes an image from imgur based on it's delete hash
  * @param {String} hash The imgur delete hash
@@ -121,5 +160,6 @@ async function deleteImage(hash) {
 module.exports = {
     createDrip,
     deleteImage,
-    uploadCard
+    uploadCard,
+    uploadTemplate
 };

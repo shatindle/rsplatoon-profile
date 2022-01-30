@@ -1,20 +1,38 @@
 <script>
     import { onMount, beforeUpdate } from 'svelte';
     import { templateList } from '../stores/metadataStore';
+    import { navigate } from 'svelte-routing';
 
     export let userdata = {};
     export let location = "";
     
     let options = [],
-        copyInput;
+        copyInput,
+        selectedTemplate,
+        open = false;
 
     onMount(async () => {
         options = await templateList();
+
+        if (userdata && userdata.template && options && options.length > 0) {
+            let templateFound = options.filter(t => t.id === userdata.template);
+
+            if (templateFound.length === 1)
+                selectedTemplate = templateFound[0];
+            else 
+                selectedTemplate = options.filter(t => t.id === "s3-yellow-indigo")[0];
+        } else {
+            selectedTemplate = options.filter(t => t.id === "s3-yellow-indigo")[0];
+        }
 
         jQuery("#save-form").on("submit", function() {
             jQuery("#submit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>  Loading...');
         });
     });
+
+    function loadTemplatePicker() {
+        navigate("/templates");
+    }
 
     function cleanFriendCode(current = "") {
         current = current.replace(/[^0-9]/g,'');
@@ -37,62 +55,15 @@
     beforeUpdate(() => {
         userdata.friendCode = cleanFriendCode(userdata.friendCode);
 
-        switch (userdata.template) {
-            case "s3-agent3":
-                userdata.image = "/css/img/canvas_s3_agent3.png";
-                break;
-            case "s3-marie":
-                userdata.image = "/css/img/canvas_s3_marie.png";
-                break;
-            case "s2-chaos-order":
-                userdata.image = "/css/img/canvas_s2_chaos_order.png";
-                break;
-            case "s2-order-chaos": 
-                userdata.image = "/css/img/canvas_s2_order_chaos.png";
-                break;
-            case "s2-octavio":
-                userdata.image = "/css/img/canvas_s2_octavio.png";
-                break;
-            case "user-coffee-squid": 
-                userdata.image = "/css/img/canvas_user_coffee_squid.png";
-                break;
-            case "s2-black-firefin":
-                userdata.image = "/css/img/canvas_s2_black_firefin.png";
-                break;
-            case "s2-toni-kensa-inverted":
-                userdata.image = "/css/img/canvas_s2_toni_kensa_inverted.png";
-                break;
-            case "s2-toni-kensa":
-                userdata.image = "/css/img/canvas_s2_toni_kensa.png";
-                break;
-            case "s1-blue-orange":
-                userdata.image = "/css/img/canvas_s1_blue_orange.png";
-                break;
-            case "s1-orange-blue":
-                userdata.image = "/css/img/canvas_s1_orange_blue.png";
-                break;
-            case "s2-pink-green":
-                userdata.image = "/css/img/canvas_s2_pink_green.png";
-                break;
-            case "s2-green-pink":
-                userdata.image = "/css/img/canvas_s2_green_pink.png";
-                break;
-            case "s3-indigo-yellow":
-                userdata.image = "/css/img/canvas_s3_indigo_yellow.png";
-                break;
-            case "user-black-gold":
-                userdata.image = "/css/img/canvas_user_black_gold.png";
-                break;
-            case "s3-callie":
-                userdata.image = "/css/img/canvas_s3_callie.png";
-                break;
-            case "s2-sanitized-pink":
-                userdata.image = "/css/img/canvas_s2_sanitized_pink.png";
-                break;
-            case "s3-yellow-indigo":
-            default:
-                userdata.image = "/css/img/canvas_s3_yellow_indigo.png";
-                break;
+        if (userdata && userdata.template && options && options.length > 0) {
+            let templateFound = options.filter(t => t.id === userdata.template);
+
+            if (templateFound.length === 1)
+                selectedTemplate = templateFound[0];
+            else 
+                selectedTemplate = options.filter(t => t.id === "s3-yellow-indigo")[0];
+        } else {
+            selectedTemplate = options.filter(t => t.id === "s3-yellow-indigo")[0];
         }
     });
     
@@ -159,21 +130,15 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12 col-md-6">
-                                    {#if options.length > 0}
-                                    <select class="form-control" name="template" bind:value="{userdata.template}">
-                                        {#each options as option}
-                                        <option value={option.value}>{option.name}</option>
-                                        {/each}
-                                    </select>
+                                <div class="col-12">
+                                    <button type="button" on:click={loadTemplatePicker} style="width:100%" class="btn btn-primary">{selectedTemplate ? selectedTemplate.name : "Splatoon 3 Blue on Yellow"}</button>
+                                    <input type="hidden" value={selectedTemplate ? selectedTemplate.id : "s3-yellow-indigo"} name="template" />
+                                    {#if selectedTemplate}
+                                    <img src={selectedTemplate.url} style="width:100%;" id="templateimage" alt="template"/>
                                     {/if}
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <img src={userdata.image} style="width:100%;" id="templateimage" alt="template"/>
                                 </div>
                             </div>
                         </div>
-
                         <button id="submit" type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
