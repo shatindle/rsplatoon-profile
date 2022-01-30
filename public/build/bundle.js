@@ -4510,9 +4510,9 @@ var app = (function () {
     			if (!src_url_equal(img.src, img_src_value = "/css/img/nodrip.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "drip-pic");
     			attr_dev(img, "alt", "no drip");
-    			add_location(img, file$1, 131, 20, 4569);
+    			add_location(img, file$1, 131, 20, 4583);
     			attr_dev(div, "class", "drip-img");
-    			add_location(div, file$1, 130, 16, 4525);
+    			add_location(div, file$1, 130, 16, 4539);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -4566,26 +4566,26 @@ var app = (function () {
     			button = element("button");
     			i1 = element("i");
     			attr_dev(i0, "class", "fa fa-chevron-left");
-    			add_location(i0, file$1, 117, 36, 3949);
+    			add_location(i0, file$1, 117, 36, 3963);
     			attr_dev(a, "href", "/");
-    			add_location(a, file$1, 117, 24, 3937);
-    			add_location(h3, file$1, 116, 20, 3907);
-    			add_location(div0, file$1, 115, 16, 3880);
+    			add_location(a, file$1, 117, 24, 3951);
+    			add_location(h3, file$1, 116, 20, 3921);
+    			add_location(div0, file$1, 115, 16, 3894);
     			if (!src_url_equal(img.src, img_src_value = /*dripdata*/ ctx[0].drip)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "class", "drip-pic");
     			attr_dev(img, "alt", "drip");
-    			add_location(img, file$1, 122, 20, 4135);
+    			add_location(img, file$1, 122, 20, 4149);
     			attr_dev(i1, "class", "fa fa-close");
-    			add_location(i1, file$1, 125, 28, 4371);
+    			add_location(i1, file$1, 125, 28, 4385);
     			attr_dev(button, "type", "submit");
     			button.value = "submit";
-    			add_location(button, file$1, 124, 24, 4304);
+    			add_location(button, file$1, 124, 24, 4318);
     			attr_dev(form, "action", "/api/drip/delete");
     			attr_dev(form, "method", "post");
     			attr_dev(form, "class", "delete-drip");
-    			add_location(form, file$1, 123, 20, 4212);
+    			add_location(form, file$1, 123, 20, 4226);
     			attr_dev(div1, "class", "drip-img");
-    			add_location(div1, file$1, 121, 16, 4091);
+    			add_location(div1, file$1, 121, 16, 4105);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -4639,7 +4639,7 @@ var app = (function () {
     			attr_dev(input, "class", "btn btn-primary");
     			attr_dev(input, "accept", ".jpg,.png,image/jpeg,image/png");
     			set_style(input, "width", "100%");
-    			add_location(input, file$1, 154, 16, 5605);
+    			add_location(input, file$1, 154, 16, 5619);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -4681,8 +4681,8 @@ var app = (function () {
     			t1 = space();
     			div = element("div");
     			div.textContent = "Each user is allowed 3 uploads per week. The limit has been reached.";
-    			add_location(h2, file$1, 151, 16, 5440);
-    			add_location(div, file$1, 152, 16, 5487);
+    			add_location(h2, file$1, 151, 16, 5454);
+    			add_location(div, file$1, 152, 16, 5501);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -4771,12 +4771,12 @@ var app = (function () {
     			if_block1.c();
     			attr_dev(div0, "class", "col-12 col-md-6 offset-md-3");
     			attr_dev(div0, "id", "original-drip");
-    			add_location(div0, file$1, 113, 8, 3769);
+    			add_location(div0, file$1, 113, 8, 3783);
     			attr_dev(i, "class", "fa fa-chevron-left");
-    			add_location(i, file$1, 138, 32, 4854);
+    			add_location(i, file$1, 138, 32, 4868);
     			attr_dev(a, "href", "/");
-    			add_location(a, file$1, 138, 20, 4842);
-    			add_location(h3, file$1, 137, 16, 4816);
+    			add_location(a, file$1, 138, 20, 4856);
+    			add_location(h3, file$1, 137, 16, 4830);
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "btn btn-primary");
     			attr_dev(button, "id", "upload-new-image");
@@ -4784,26 +4784,26 @@ var app = (function () {
     			set_style(button, "position", "absolute");
     			set_style(button, "top", "5px");
     			set_style(button, "right", "15px");
-    			add_location(button, file$1, 141, 16, 4963);
-    			add_location(div1, file$1, 136, 12, 4793);
+    			add_location(button, file$1, 141, 16, 4977);
+    			add_location(div1, file$1, 136, 12, 4807);
     			attr_dev(img, "id", "preview");
     			attr_dev(img, "class", "drip-pic");
     			attr_dev(img, "alt", "drip");
-    			add_location(img, file$1, 144, 16, 5212);
+    			add_location(img, file$1, 144, 16, 5226);
     			attr_dev(div2, "class", "drip-img");
-    			add_location(div2, file$1, 143, 12, 5172);
+    			add_location(div2, file$1, 143, 12, 5186);
     			attr_dev(div3, "class", "col-12 col-md-6 offset-md-3");
     			attr_dev(div3, "id", "new-drip");
     			set_style(div3, "display", "none");
-    			add_location(div3, file$1, 135, 8, 4702);
+    			add_location(div3, file$1, 135, 8, 4716);
     			attr_dev(div4, "class", "row");
-    			add_location(div4, file$1, 112, 4, 3742);
+    			add_location(div4, file$1, 112, 4, 3756);
     			attr_dev(div5, "class", "col-12 col-md-6 offset-md-3");
-    			add_location(div5, file$1, 149, 8, 5341);
+    			add_location(div5, file$1, 149, 8, 5355);
     			attr_dev(div6, "class", "row");
-    			add_location(div6, file$1, 148, 4, 5314);
+    			add_location(div6, file$1, 148, 4, 5328);
     			attr_dev(div7, "class", "container");
-    			add_location(div7, file$1, 111, 0, 3713);
+    			add_location(div7, file$1, 111, 0, 3727);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4831,7 +4831,7 @@ var app = (function () {
     			if_block1.m(div5, null);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*uploadNewImage*/ ctx[1], false, false, false);
+    				dispose = listen_dev(button, "click", uploadNewImage, false, false, false);
     				mounted = true;
     			}
     		},
@@ -4931,6 +4931,29 @@ var app = (function () {
     	}
     }
 
+    async function uploadNewImage() {
+    	var resizedImage = dataURLToBlob(document.getElementById("preview").src);
+    	var data = new FormData();
+    	data.append('drip', resizedImage);
+    	jQuery("#upload-new-image").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>  Loading...');
+
+    	jQuery.ajax({
+    		url: "/api/drip/save",
+    		data,
+    		cache: false,
+    		contentType: false,
+    		processData: false,
+    		type: 'POST',
+    		success() {
+    			window.location.reload();
+    		},
+    		error() {
+    			alert("Upload failed");
+    			window.location.reload();
+    		}
+    	});
+    }
+
     /* Utility function to convert a canvas to a BLOB */
     function dataURLToBlob(dataURL) {
     	var BASE64_MARKER = ';base64,';
@@ -4966,29 +4989,6 @@ var app = (function () {
     		$$invalidate(0, dripdata = await getDrip());
     	});
 
-    	async function uploadNewImage() {
-    		var resizedImage = dataURLToBlob(document.getElementById("preview").src);
-    		var data = new FormData();
-    		data.append('drip', resizedImage);
-    		jQuery("#upload-new-image").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>  Loading...');
-
-    		jQuery.ajax({
-    			url: "/api/drip/save",
-    			data,
-    			cache: false,
-    			contentType: false,
-    			processData: false,
-    			type: 'POST',
-    			success() {
-    				location.reload();
-    			},
-    			error() {
-    				alert("Upload failed");
-    				location.reload();
-    			}
-    		});
-    	}
-
     	const writable_props = ['userdata', 'location'];
 
     	Object.keys($$props).forEach(key => {
@@ -4996,8 +4996,8 @@ var app = (function () {
     	});
 
     	$$self.$$set = $$props => {
-    		if ('userdata' in $$props) $$invalidate(2, userdata = $$props.userdata);
-    		if ('location' in $$props) $$invalidate(3, location = $$props.location);
+    		if ('userdata' in $$props) $$invalidate(1, userdata = $$props.userdata);
+    		if ('location' in $$props) $$invalidate(2, location = $$props.location);
     	};
 
     	$$self.$capture_state = () => ({
@@ -5012,8 +5012,8 @@ var app = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('userdata' in $$props) $$invalidate(2, userdata = $$props.userdata);
-    		if ('location' in $$props) $$invalidate(3, location = $$props.location);
+    		if ('userdata' in $$props) $$invalidate(1, userdata = $$props.userdata);
+    		if ('location' in $$props) $$invalidate(2, location = $$props.location);
     		if ('dripdata' in $$props) $$invalidate(0, dripdata = $$props.dripdata);
     	};
 
@@ -5021,13 +5021,13 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [dripdata, uploadNewImage, userdata, location];
+    	return [dripdata, userdata, location];
     }
 
     class Drip extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { userdata: 2, location: 3 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { userdata: 1, location: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,

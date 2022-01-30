@@ -4,6 +4,8 @@ const databaseApi = require("../dal/databaseApi");
 const fetch = require("node-fetch");
 const cardApi = require("../dal/cardApi");
 const imgApi = require("../dal/imgApi");
+const util = require("util");
+const readFile = util.promisify(require("fs").readFile);
 
 function cleanFriendCode(friendcode) {
     friendcode = friendcode.replace(/(\r\n|\n|\r)/gm, "");
