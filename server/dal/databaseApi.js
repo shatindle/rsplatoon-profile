@@ -1,4 +1,5 @@
 const Firestore = require('@google-cloud/firestore');
+const Fuse = require('fuse.js')
 const idApi = require('./idApi');
 const webhookApi = require("./webhookApi");
 const appSettings = require("../../settings.json");
@@ -17,6 +18,8 @@ const metrics = {
     calls: 1,
     time: ""
 };
+
+let templates = null;
 
 function currentDate() {
     var today = new Date();
@@ -39,7 +42,7 @@ function limit() {
         metrics.calls = 1;
     }
 
-    if (metrics.calls > 10000)
+    if (metrics.calls > 20000)
         throw "API Limit call for day reached";
 }
 
@@ -123,7 +126,7 @@ function weekStart() {
     return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
 }
 
-const UPDATE_LIMIT = 20;
+const UPDATE_LIMIT = 100;
 
 async function canUpdate(userId) {
     const userData = await getUserProfileByUserId(userId);
@@ -143,6 +146,118 @@ async function canUpdate(userId) {
     }
 
     return false;
+}
+
+async function loadAllTemplates() {
+    var ref = await db.collection("templates").get();
+    templates = ref.docs.map(doc => doc.data());
+}
+
+async function getTemplates() {
+    if (!templates)
+        await loadAllTemplates();
+
+    return templates;
+}
+
+async function searchTemplates(searchTerms) {
+    const templates = await getTemplates();
+
+    const options = {
+        shouldSort: true,
+        threshold: 0.7,
+        keys: [
+            "name",
+            "keywords"
+        ]
+    };
+
+    const fuse = new Fuse(templates, options);
+
+    return fuse.search(searchTerms).map(v => v.item).slice(0, 20);
+}
+
+async function getTemplate(id) {
+    if (!templates)
+        await loadAllTemplates();
+
+    const existingTemplates = templates.filter(template => template.id === id);
+
+    if (existingTemplates && existingTemplates.length === 1)
+        return existingTemplates[0];
+
+    return null;
+}
+
+function removeItemAll(arr, value) {
+    var i = 0;
+    while (i < arr.length) {
+        if (arr[i] === value) {
+            arr.splice(i, 1);
+        } else {
+            ++i;
+        }
+    }
+    return arr;
+}
+
+async function deleteTemplate(userId, slot) {
+    slot = parseInt(slot.toString().replace(/[^0-9]/g, ''));
+
+    if (!templates)
+        await loadAllTemplates();
+
+    const existingTemplates = templates.filter(template => template.userId === userId && template.slot === slot);
+
+    if (existingTemplates && existingTemplates.length > 0) {
+        existingTemplates.forEach(v => templates = removeItemAll(templates, v));
+    }
+
+    var ref = await db.collection("templates").doc(userId + "-" + slot.toString());
+    var doc = await ref.get();
+    
+    if (doc.exists) {
+        await ref.delete();
+    }
+}
+
+async function updateTemplate(userId, slot, url, deleteHash, name, keywords, friendcodecolor, namecolor) {
+    slot = parseInt(slot.toString().replace(/[^0-9]/g, ''));
+
+    if (slot < 0 || slot > 9)
+        throw "Slot out of bounds";
+
+    if (!templates)
+        await loadAllTemplates();
+
+    const existingTemplates = templates.filter(template => template.userId === userId && template.slot === slot);
+
+    if (existingTemplates && existingTemplates.length > 0) {
+        existingTemplates.forEach(v => templates = removeItemAll(templates, v));
+    }
+
+    var ref = await db.collection("templates").doc(userId + "-" + slot.toString());
+
+    const newTemplate = {
+        userId, 
+        slot,
+        id: userId + "-" + slot.toString(),
+        url, 
+        deleteHash,
+        name,
+        keywords,
+        color_friendcode: friendcodecolor,
+        color_name: namecolor,
+        createdOn: Firestore.Timestamp.now()
+    };
+
+    await ref.set(newTemplate);
+
+    templates.push(newTemplate);
+
+    return {
+        ...newTemplate
+    };
 }
 
 async function updateUserProfile(userId, changes, updateVersion) {
@@ -981,5 +1096,11 @@ module.exports = {
 
     loadTeamWebhooks,
     saveTeamWebhook,
-    deleteTeamWebhook
+    deleteTeamWebhook,
+
+    getTemplates,
+    deleteTemplate,
+    updateTemplate,
+    getTemplate,
+    searchTemplates
 };

@@ -1,12 +1,13 @@
 <script>
     import { onMount } from 'svelte';
-    import { Router, Route } from 'svelte-routing';
+    import { Router, Route, link } from 'svelte-routing';
     import { userData } from './stores/metadataStore';
 
     import Home from './pages/Home.svelte';
     import Profile from './pages/Profile.svelte';
     import Settings from './pages/Settings.svelte';
     import Drip from './pages/Drip.svelte';
+	import Templates from './pages/Templates.svelte';
 
     export let url = '';
     
@@ -14,6 +15,10 @@
 
     onMount(async () => userdata = await userData());
     const toggleusermenu = () => jQuery(".usermenu").slideToggle();
+
+	const setTemplate = (id) => {
+		userdata.template = id;
+	}
 </script>
 
 <main>
@@ -50,10 +55,13 @@
 					</div>
 					<img src="{userdata.avatar}" on:click={toggleusermenu} alt="avatar" />
 				</div>
+				<a class="btn btn-primary" href="/" role="button" use:link>Home</a>
+				<a class="btn btn-primary" href="/p/{userdata.profileId}" role="button" use:link>Profile</a>
+				<a class="btn btn-primary" href="/templates" role="button" use:link>Templates</a>
             {/if}
-			<a class="btn btn-primary" href="/" role="button">Home</a>
 		</div>
         <Router {url}>
+            <Route path="/templates" component={Templates} {userdata} {setTemplate} />
             <Route path="/drip" component={Drip} {userdata} />
             <Route path="/settings" component={Settings} {userdata} />
             <Route path="/p/:profileId" component={Profile} />

@@ -1,25 +1,69 @@
 const express = require("express");
 const router = express.Router();
+const { getTemplates, deleteTemplate } = require("../dal/databaseApi");
+const { uploadTemplate, deleteImage } = require("../dal/imgApi");
+const multer  = require('multer');
+const upload = multer({ storage: multer.memoryStorage({}) });
 
-router.get("/templates", (req, res) => res.json([
-    { name: "Splatoon 3 Blue on Yellow", value: "s3-yellow-indigo" },
-    { name: "Splatoon 3 Yellow on Blue", value: "s3-indigo-yellow" },
-    { name: "Splatoon 3 Callie", value: "s3-callie" },
-    { name: "Splatoon 3 Agent 3", value: "s3-agent3" },
-    { name: "Splatoon 3 Marie", value: "s3-marie" },
-    { name: "Splatoon 2 Green on Pink", value: "s2-pink-green" },
-    { name: "Splatoon 2 Pink on Green", value: "s2-green-pink" },
-    { name: "Splatoon 2 Firefin on Black", value: "s2-black-firefin" },
-    { name: "Splatoon 2 Pink on Sanitized", value: "s2-sanitized-pink" },
-    { name: "Splatoon 2 Order on Chaos", value: "s2-chaos-order" },
-    { name: "Splatoon 2 Chaos on Order", value: "s2-order-chaos" },
-    { name: "Splatoon 2 Octavio", value: "s2-octavio" },
-    { name: "Splatoon 1 Blue on Orange", value: "s1-orange-blue" },
-    { name: "Splatoon 1 Orange on Blue", value: "s1-blue-orange" },
-    { name: "Toni Kensa White on Black", value: "s2-toni-kensa" },
-    { name: "Toni Kensa Black on White", value: "s2-toni-kensa-inverted" },
-    { name: "Custom Gold on Black", value: "user-black-gold" },
-    { name: "Custom Coffee Squid", value: "user-coffee-squid" }
-]));
+router.get("/templates", async (req, res) => {
+    if (req.session.userId) {
+        const templates = (await getTemplates()).filter(template => template.userId === req.session.userId);
+
+        return res.json(templates);
+    }
+    
+    res.redirect("/");
+});
+
+// TODO: revisit search if we end up with a massive quantity of templates
+router.get("/templates/all", async (req, res) => {
+    if (req.session.userId) {
+        return res.json(await getTemplates());
+    }
+
+    res.redirect("/");
+});
+
+router.post("/templates/save", upload.single('img'), async (req, res) => {
+    try {
+        if (!req.session.userId)
+            return res.redirect("/");
+
+        if (req.file) {
+            await uploadTemplate(req.session.userId, req.body.slot, req.file.buffer, req.body.name, req.body.searchTerms, req.body.friendcodecolor, req.body.namecolor);
+        }
+    } catch (err) {
+        return res.status(500).send({
+            body: "error"
+        });
+    }
+
+    res.redirect("/templates");
+});
+
+router.post("/templates/delete", express.json(), async (req, res) => {
+    try {
+        if (!req.session.userId)
+            return res.redirect("/");
+
+        const templates = (await getTemplates()).filter(template => template.userId === req.session.userId && template.slot === req.body.slot);
+
+        if (templates && templates.length === 1) {
+            const template = templates[0];
+
+            // delete the record
+            await deleteTemplate(req.session.userId, req.body.slot);
+
+            // delete it from imgur
+            await deleteImage(template.deleteHash);
+        }
+    } catch (err) {
+        return res.status(500).send({
+            body: "error"
+        });
+    }
+    
+    res.redirect("/templates");
+});
 
 module.exports = router;
