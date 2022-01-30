@@ -99,7 +99,7 @@ async function savePage(req, res, next) {
                         const response = await fetch(userData.drip);
                         dripBuffer = Buffer.from(await response.arrayBuffer());
                     } else {
-                        dripBuffer = await readFile(path.join(__dirname, "css/img/nodrip.png"));
+                        dripBuffer = await readFile(path.join(__dirname, "../../public/css/img/nodrip.png"));
                     }
 
                     // update user card
