@@ -6,6 +6,7 @@ const cardApi = require("../dal/cardApi");
 const imgApi = require("../dal/imgApi");
 const util = require("util");
 const readFile = util.promisify(require("fs").readFile);
+const path = require("path");
 
 function cleanFriendCode(friendcode) {
     friendcode = friendcode.replace(/(\r\n|\n|\r)/gm, "");
