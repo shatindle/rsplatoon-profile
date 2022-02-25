@@ -8,6 +8,7 @@ router.get('/', (req, res, next) => {
 
         res.redirect('/');
     } catch (e) {
+        console.log(`Error logging out: ${e}`);
         next(e);
     }
 });

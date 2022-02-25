@@ -5,9 +5,7 @@
   "main": "server.mjs",
   "scripts": {
     "build": "rollup -c",
-    "dev": "run-p dev:server dev:client",
-    "dev:client": "rollup -c -w",
-    "dev:server": "node server/server.js --dev",
+    "dev": "rollup -c -w",
     "start": "node server/server.js --dev"
   },
   "repository": {
