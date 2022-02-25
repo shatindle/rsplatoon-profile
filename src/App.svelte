@@ -10,11 +10,14 @@
 	import Templates from './pages/Templates.svelte';
 
     export let url = '';
-    
+
     let userdata = {};
 
     onMount(async () => userdata = await userData());
     const toggleusermenu = () => jQuery(".usermenu").slideToggle();
+
+	// Load Discord image as fallback if avatar is not available
+    const loadgeneric = () => useravatar.src = "/css/img/discord.png";
 
 	const setTemplate = (id) => {
 		userdata.template = id;
@@ -53,7 +56,7 @@
 							</a>
 						</div>
 					</div>
-					<img src="{userdata.avatar}" on:click={toggleusermenu} alt="avatar" />
+					<img src="{userdata.avatar}" id="useravatar" on:click={toggleusermenu} on:error={loadgeneric} alt="avatar" />
 				</div>
 				<a class="btn btn-primary" href="/" role="button" use:link>Home</a>
 				<a class="btn btn-primary" href="/p/{userdata.profileId}" role="button" use:link>Profile</a>
