@@ -5,7 +5,7 @@ const webhookApi = require("./webhookApi");
 const appSettings = require("../../settings.json");
 
 const db = new Firestore({
-    projectId: 'rsplatoon-discord',
+    projectId: appSettings.projectId,
     keyFilename: './firebase.json',
 });
 
