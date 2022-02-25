@@ -3,6 +3,7 @@ const cardApi = require("../dal/cardApi");
 const imgApi = require("../dal/imgApi");
 const fetch = require("node-fetch");
 const util = require("util");
+const path = require("path");
 const readFile = util.promisify(require("fs").readFile);
 
 async function getProfile(id) {
@@ -19,7 +20,7 @@ async function getProfile(id) {
 
         if (userData.drip && userData.drip !== "NONE")
             responseData.drip = userData.drip;
-        
+
         // do they have a card?  If not, make one!
         if (!userData.card || userData.card === "NONE") {
             let dripBuffer;
