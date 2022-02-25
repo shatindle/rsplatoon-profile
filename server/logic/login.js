@@ -186,7 +186,7 @@ async function botTokenLogin(req, res) {
  * @param {express.Response} res Delete the session cookie
  */
 function logout(res) {
-    res.clearCookie(COOKIE_NAME);
+    res.clearCookie(COOKIE_NAME, { domain: appSettings.cookieLocation });
 }
 
 module.exports = {
