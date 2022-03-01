@@ -166,16 +166,20 @@
                                 </div>
                             </div>
                             <div class="search-terms">
-                                {#each template.keywords.split(' ') as keyword}
-                                {#if keyword}
-                                <div class="term">{keyword}</div>
-                                {/if}
+								{#each template.keywords.split(' ') as keyword, i}
+								{#if keyword}
+									{#if template.keywords.split(' ').length - 1 > i}
+									{`${keyword}, `}
+									{:else}
+									{`${keyword}`}
+									{/if}
+								{/if}
                                 {/each}
                             </div>
                         </button>
                         {#if template.userId === userdata.id}
                         <div class="row">
-                            <div class="col" style="position:relative;margin:12px;">
+                            <div class="col" style="position:relative;margin: 0px 12px 12px 12px;">
                                 <button type="button" class="btn btn-danger" style="width:100%;" on:click={async () => await confirmDelete(template.name, template.slot)}>Delete</button>
                             </div>
                         </div>
@@ -202,15 +206,11 @@
     }
 
     .search-terms {
+		font-size: 14px;
+        color: #ddd;
+        margin: 4px;
+        text-shadow: -0.5px -1px 0.5px #444;
         width: 100%;
-    }
-
-    .term {
-        background-color: #ccc;
-        padding: 2px 4px;
-        border-radius: 4px;
-        display: inline-block;
-        margin: 2px;
     }
 
     /* Customize the label (the container) */
