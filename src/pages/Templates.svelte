@@ -4,6 +4,11 @@
     import { searchTemplates, deleteTemplate } from '../stores/templateStore';
     import Fuse from 'fuse.js'
 
+    /* Ratio to get font size in resized template preview.
+     * Determined from template width / font size in server/dal/cardApi.js
+     */
+    const PREVIEW_FONT_RATIO = 21.891;
+
     export let userdata = {};
     export let setTemplate = (template) => {};
     let templates = null;
@@ -12,6 +17,8 @@
     let fuse;
     let search = '';
     let unusedSlot = 0;
+    let templateWidth = 0;
+    let previewFontSize = 0;
 
     onMount(async () => {
         templates = await searchTemplates();
@@ -24,7 +31,7 @@
 
             if (t1.userId === userdata.id)
                 return -1;
-            
+
             return 1;
         })
         filteredTemplates = templates;
@@ -66,6 +73,8 @@
             window.location.reload();
         }
     }
+
+    $: previewFontSize = templateWidth / PREVIEW_FONT_RATIO;
 </script>
 
 {#if userdata}
@@ -118,7 +127,7 @@
             <h3>Pick a Template</h3>
             <div class="row no-gutters">
                 <div class="col">
-                    <label class="checkbox-container">Just my templates 
+                    <label class="checkbox-container">Just my templates
                         <input type="checkbox" bind:checked={justMyTemplates} />
                         <span class="checkmark"></span>
                     </label>
@@ -130,26 +139,30 @@
                     <input type="text" class="form-control" bind:value={search} on:input={filterTemplates} />
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row no-gutters" style="margin-top: 10px;">
                 {#if templates}
-                {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template}
+                {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template, i}
                 <div class="col-12 col-md-4" style="position:relative;">
-                    <div class="floating-card mdc-elevation--z20">
-                        <div class="row no-gutters">
+                    <div class="floating-card mdc-elevation--z8">
+                        <div class="row no-gutters" style="margin-left: 8px; margin-top: 4px;">
                             <div class="col-12 no-gutters">
                                 <h5>{template.name}</h5>
                             </div>
                         </div>
                         <button type="btn btn-primary" class="template-choice" on:click={() => clickTemplate(template.id)}>
-                            <img src={template.url} alt="template" style="width:100%;" />
-                            <div class="row">
-                                <div style="text-align:left" class="col">
-                                    <input class="color-display" type="color" readonly value={template.color_friendcode} />
-                                    Friend Code
+                            <div class="card-preview">
+                                {#if i === 0}
+                                <div bind:clientWidth={templateWidth}>
+                                    <img src={template.url} alt="template" style="width:100%;"/>
                                 </div>
-                                <div style="text-align:left" class="col">
-                                    <input class="color-display" type="color" readonly value={template.color_name} />
-                                    Name
+                                {:else}
+                                <img src={template.url} alt="template" style="width:100%;"/>
+                                {/if}
+                                <div class="card-text" style="color:{template.color_friendcode};top:11.5%; font-size: {previewFontSize}px;">
+                                    0000-0000-0000
+                                </div>
+                                <div class="card-text" style="color:{template.color_name};top:26.7%; font-size: {previewFontSize}px;">
+                                    Example
                                 </div>
                             </div>
                             <div class="search-terms">
@@ -163,7 +176,7 @@
                         {#if template.userId === userdata.id}
                         <div class="row">
                             <div class="col" style="position:relative;margin:12px;">
-                                <button type="button" class="btn btn-danger" style="width:100%;" on:click={async () => await confirmDelete(template.name, template.slot)}>Delete</button> 
+                                <button type="button" class="btn btn-danger" style="width:100%;" on:click={async () => await confirmDelete(template.name, template.slot)}>Delete</button>
                             </div>
                         </div>
                         {/if}
@@ -195,7 +208,7 @@
     .term {
         background-color: #ccc;
         padding: 2px 4px;
-        border-radius: 6px;
+        border-radius: 4px;
         display: inline-block;
         margin: 2px;
     }
@@ -273,15 +286,20 @@
         background-color: white;
     }
 
-    .color-display {
-        border: none;
-        background-color: transparent;
-    }
-
     .floating-card {
         margin: 6px 8px;
         background-color: white;
         padding: 6px 8px;
-        border-radius: 20px;
+        border-radius: 8px;
+    }
+
+    .card-preview {
+        position: relative;
+    }
+
+    .card-text {
+        position: absolute;
+        right: 2.7%;
+        font-family: SplatRegular;
     }
 </style>
