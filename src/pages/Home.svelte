@@ -145,11 +145,5 @@
             </div>
         </div>
     </div>
-{:else}
-    <div class="nameentry needtologin">
-        <a id="loginDiscord" href={userdata.loginUrl}>
-            <button class="btn btn-primary" type="button">Discord Login</button>
-        </a>
-    </div>
 {/if}
 </div>
