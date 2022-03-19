@@ -163,6 +163,59 @@ var app = (function () {
             node.style.setProperty(key, value, important ? 'important' : '');
         }
     }
+    // unfortunately this can't be a constant as that wouldn't be tree-shakeable
+    // so we cache the result instead
+    let crossorigin;
+    function is_crossorigin() {
+        if (crossorigin === undefined) {
+            crossorigin = false;
+            try {
+                if (typeof window !== 'undefined' && window.parent) {
+                    void window.parent.document;
+                }
+            }
+            catch (error) {
+                crossorigin = true;
+            }
+        }
+        return crossorigin;
+    }
+    function add_resize_listener(node, fn) {
+        const computed_style = getComputedStyle(node);
+        if (computed_style.position === 'static') {
+            node.style.position = 'relative';
+        }
+        const iframe = element('iframe');
+        iframe.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; ' +
+            'overflow: hidden; border: 0; opacity: 0; pointer-events: none; z-index: -1;');
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.tabIndex = -1;
+        const crossorigin = is_crossorigin();
+        let unsubscribe;
+        if (crossorigin) {
+            iframe.src = "data:text/html,<script>onresize=function(){parent.postMessage(0,'*')}</script>";
+            unsubscribe = listen(window, 'message', (event) => {
+                if (event.source === iframe.contentWindow)
+                    fn();
+            });
+        }
+        else {
+            iframe.src = 'about:blank';
+            iframe.onload = () => {
+                unsubscribe = listen(iframe.contentWindow, 'resize', fn);
+            };
+        }
+        append(node, iframe);
+        return () => {
+            if (crossorigin) {
+                unsubscribe();
+            }
+            else if (unsubscribe && iframe.contentWindow) {
+                unsubscribe();
+            }
+            detach(iframe);
+        };
+    }
     function custom_event(type, detail, bubbles = false) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, false, detail);
@@ -1344,7 +1397,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block_1$4, create_else_block$4];
+    	const if_block_creators = [create_if_block_1$5, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -1477,7 +1530,7 @@ var app = (function () {
     }
 
     // (41:2) {#if component !== null}
-    function create_if_block_1$4(ctx) {
+    function create_if_block_1$5(ctx) {
     	let switch_instance;
     	let switch_instance_anchor;
     	let current;
@@ -1570,7 +1623,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$4.name,
+    		id: create_if_block_1$5.name,
     		type: "if",
     		source: "(41:2) {#if component !== null}",
     		ctx
@@ -1817,54 +1870,6 @@ var app = (function () {
     const { console: console_1$2 } = globals;
     const file$5 = "src\\pages\\Home.svelte";
 
-    // (148:0) {:else}
-    function create_else_block_1$1(ctx) {
-    	let div;
-    	let a;
-    	let button;
-    	let a_href_value;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			a = element("a");
-    			button = element("button");
-    			button.textContent = "Discord Login";
-    			attr_dev(button, "class", "btn btn-primary");
-    			attr_dev(button, "type", "button");
-    			add_location(button, file$5, 150, 12, 6307);
-    			attr_dev(a, "id", "loginDiscord");
-    			attr_dev(a, "href", a_href_value = /*userdata*/ ctx[0].loginUrl);
-    			add_location(a, file$5, 149, 8, 6247);
-    			attr_dev(div, "class", "nameentry needtologin");
-    			add_location(div, file$5, 148, 4, 6202);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, a);
-    			append_dev(a, button);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*userdata*/ 1 && a_href_value !== (a_href_value = /*userdata*/ ctx[0].loginUrl)) {
-    				attr_dev(a, "href", a_href_value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block_1$1.name,
-    		type: "else",
-    		source: "(148:0) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
     // (79:0) {#if userdata.id}
     function create_if_block$5(ctx) {
     	let div11;
@@ -1909,14 +1914,14 @@ var app = (function () {
     	let dispose;
     	let if_block0 = /*userdata*/ ctx[0].profileId && create_if_block_3$2(ctx);
 
-    	function select_block_type_1(ctx, dirty) {
+    	function select_block_type(ctx, dirty) {
     		if (/*userdata*/ ctx[0].drip) return create_if_block_2$2;
     		return create_else_block$3;
     	}
 
-    	let current_block_type = select_block_type_1(ctx);
+    	let current_block_type = select_block_type(ctx);
     	let if_block1 = current_block_type(ctx);
-    	let if_block2 = /*selectedTemplate*/ ctx[2] && create_if_block_1$3(ctx);
+    	let if_block2 = /*selectedTemplate*/ ctx[2] && create_if_block_1$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -2087,7 +2092,7 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (current_block_type === (current_block_type = select_block_type_1(ctx)) && if_block1) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
     				if_block1.p(ctx, dirty);
     			} else {
     				if_block1.d(1);
@@ -2121,7 +2126,7 @@ var app = (function () {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
-    					if_block2 = create_if_block_1$3(ctx);
+    					if_block2 = create_if_block_1$4(ctx);
     					if_block2.c();
     					if_block2.m(div5, null);
     				}
@@ -2363,7 +2368,7 @@ var app = (function () {
     }
 
     // (136:36) {#if selectedTemplate}
-    function create_if_block_1$3(ctx) {
+    function create_if_block_1$4(ctx) {
     	let img;
     	let img_src_value;
 
@@ -2391,7 +2396,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$3.name,
+    		id: create_if_block_1$4.name,
     		type: "if",
     		source: "(136:36) {#if selectedTemplate}",
     		ctx
@@ -2402,19 +2407,12 @@ var app = (function () {
 
     function create_fragment$5(ctx) {
     	let div;
-
-    	function select_block_type(ctx, dirty) {
-    		if (/*userdata*/ ctx[0].id) return create_if_block$5;
-    		return create_else_block_1$1;
-    	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
+    	let if_block = /*userdata*/ ctx[0].id && create_if_block$5(ctx);
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			if_block.c();
+    			if (if_block) if_block.c();
     			add_location(div, file$5, 77, 0, 2348);
     		},
     		l: function claim(nodes) {
@@ -2422,26 +2420,27 @@ var app = (function () {
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			if_block.m(div, null);
+    			if (if_block) if_block.m(div, null);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
-
+    			if (/*userdata*/ ctx[0].id) {
     				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block$5(ctx);
     					if_block.c();
     					if_block.m(div, null);
     				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			if_block.d();
+    			if (if_block) if_block.d();
     		}
     	};
 
@@ -3962,7 +3961,7 @@ var app = (function () {
     	let i1;
     	let t4;
     	let if_block_anchor;
-    	let if_block = /*settings*/ ctx[0].teamWebhookAllowed && create_if_block_1$2(ctx);
+    	let if_block = /*settings*/ ctx[0].teamWebhookAllowed && create_if_block_1$3(ctx);
 
     	const block = {
     		c: function create() {
@@ -4058,7 +4057,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_1$2(ctx);
+    					if_block = create_if_block_1$3(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -4088,7 +4087,7 @@ var app = (function () {
     }
 
     // (204:8) {#if settings.teamWebhookAllowed}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_1$3(ctx) {
     	let form;
     	let div1;
     	let div0;
@@ -4167,7 +4166,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_1$3.name,
     		type: "if",
     		source: "(204:8) {#if settings.teamWebhookAllowed}",
     		ctx
@@ -4424,7 +4423,7 @@ var app = (function () {
     const file$2 = "src\\pages\\Drip.svelte";
 
     // (130:12) {:else}
-    function create_else_block_1(ctx) {
+    function create_else_block_1$1(ctx) {
     	let div;
     	let img;
     	let img_src_value;
@@ -4452,7 +4451,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block_1.name,
+    		id: create_else_block_1$1.name,
     		type: "else",
     		source: "(130:12) {:else}",
     		ctx
@@ -4462,7 +4461,7 @@ var app = (function () {
     }
 
     // (115:12) {#if dripdata.drip}
-    function create_if_block_1$1(ctx) {
+    function create_if_block_1$2(ctx) {
     	let div0;
     	let h3;
     	let a;
@@ -4541,7 +4540,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$1.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(115:12) {#if dripdata.drip}",
     		ctx
@@ -4657,8 +4656,8 @@ var app = (function () {
     	let dispose;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*dripdata*/ ctx[0].drip) return create_if_block_1$1;
-    		return create_else_block_1;
+    		if (/*dripdata*/ ctx[0].drip) return create_if_block_1$2;
+    		return create_else_block_1$1;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -6781,20 +6780,22 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
+    	child_ctx[20] = list[i];
+    	child_ctx[22] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[20] = list[i];
+    	child_ctx[23] = list[i];
+    	child_ctx[22] = i;
     	return child_ctx;
     }
 
-    // (71:0) {#if userdata}
+    // (80:0) {#if userdata}
     function create_if_block$1(ctx) {
     	let div7;
-    	let show_if = /*templates*/ ctx[1] && /*templates*/ ctx[1].filter(/*func*/ ctx[10]).length < 10;
+    	let show_if = /*templates*/ ctx[2] && /*templates*/ ctx[2].filter(/*func*/ ctx[12]).length < 10;
     	let t0;
     	let div6;
     	let div5;
@@ -6817,11 +6818,11 @@ var app = (function () {
     	let div4;
     	let mounted;
     	let dispose;
-    	let if_block0 = show_if && create_if_block_4(ctx);
+    	let if_block0 = show_if && create_if_block_6(ctx);
 
     	function select_block_type(ctx, dirty) {
-    		if (/*templates*/ ctx[1]) return create_if_block_1;
-    		return create_else_block;
+    		if (/*templates*/ ctx[2]) return create_if_block_1$1;
+    		return create_else_block_2;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -6840,7 +6841,7 @@ var app = (function () {
     			div1 = element("div");
     			div0 = element("div");
     			label0 = element("label");
-    			t3 = text("Just my templates \r\n                        ");
+    			t3 = text("Just my templates\r\n                        ");
     			input0 = element("input");
     			t4 = space();
     			span = element("span");
@@ -6854,36 +6855,37 @@ var app = (function () {
     			t8 = space();
     			div4 = element("div");
     			if_block1.c();
-    			add_location(h3, file$1, 117, 12, 4184);
+    			add_location(h3, file$1, 126, 12, 4481);
     			attr_dev(input0, "type", "checkbox");
-    			attr_dev(input0, "class", "svelte-aj5kgd");
-    			add_location(input0, file$1, 121, 24, 4385);
-    			attr_dev(span, "class", "checkmark svelte-aj5kgd");
-    			add_location(span, file$1, 122, 24, 4467);
-    			attr_dev(label0, "class", "checkbox-container svelte-aj5kgd");
-    			add_location(label0, file$1, 120, 20, 4307);
+    			attr_dev(input0, "class", "svelte-195lik3");
+    			add_location(input0, file$1, 130, 24, 4681);
+    			attr_dev(span, "class", "checkmark svelte-195lik3");
+    			add_location(span, file$1, 131, 24, 4763);
+    			attr_dev(label0, "class", "checkbox-container svelte-195lik3");
+    			add_location(label0, file$1, 129, 20, 4604);
     			attr_dev(div0, "class", "col");
-    			add_location(div0, file$1, 119, 16, 4268);
+    			add_location(div0, file$1, 128, 16, 4565);
     			attr_dev(div1, "class", "row no-gutters");
-    			add_location(div1, file$1, 118, 12, 4222);
+    			add_location(div1, file$1, 127, 12, 4519);
     			attr_dev(label1, "for", "search");
-    			add_location(label1, file$1, 128, 20, 4671);
+    			add_location(label1, file$1, 137, 20, 4967);
     			attr_dev(input1, "type", "text");
     			attr_dev(input1, "class", "form-control");
-    			add_location(input1, file$1, 129, 20, 4727);
+    			add_location(input1, file$1, 138, 20, 5023);
     			attr_dev(div2, "class", "col");
-    			add_location(div2, file$1, 127, 16, 4632);
+    			add_location(div2, file$1, 136, 16, 4928);
     			attr_dev(div3, "class", "row no-gutters");
-    			add_location(div3, file$1, 126, 12, 4586);
+    			add_location(div3, file$1, 135, 12, 4882);
     			attr_dev(div4, "class", "row no-gutters");
-    			add_location(div4, file$1, 132, 12, 4874);
+    			set_style(div4, "margin-top", "10px");
+    			add_location(div4, file$1, 141, 12, 5170);
     			attr_dev(div5, "class", "col");
-    			add_location(div5, file$1, 116, 8, 4153);
+    			add_location(div5, file$1, 125, 8, 4450);
     			attr_dev(div6, "class", "row");
     			set_style(div6, "margin-top", "14px");
-    			add_location(div6, file$1, 115, 4, 4100);
+    			add_location(div6, file$1, 124, 4, 4397);
     			attr_dev(div7, "class", "container");
-    			add_location(div7, file$1, 71, 0, 2015);
+    			add_location(div7, file$1, 80, 0, 2312);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div7, anchor);
@@ -6898,7 +6900,7 @@ var app = (function () {
     			append_dev(div0, label0);
     			append_dev(label0, t3);
     			append_dev(label0, input0);
-    			input0.checked = /*justMyTemplates*/ ctx[2];
+    			input0.checked = /*justMyTemplates*/ ctx[3];
     			append_dev(label0, t4);
     			append_dev(label0, span);
     			append_dev(div5, t5);
@@ -6907,29 +6909,29 @@ var app = (function () {
     			append_dev(div2, label1);
     			append_dev(div2, t7);
     			append_dev(div2, input1);
-    			set_input_value(input1, /*search*/ ctx[4]);
+    			set_input_value(input1, /*search*/ ctx[5]);
     			append_dev(div5, t8);
     			append_dev(div5, div4);
     			if_block1.m(div4, null);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "change", /*input0_change_handler*/ ctx[11]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
-    					listen_dev(input1, "input", /*filterTemplates*/ ctx[6], false, false, false)
+    					listen_dev(input0, "change", /*input0_change_handler*/ ctx[13]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[14]),
+    					listen_dev(input1, "input", /*filterTemplates*/ ctx[8], false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*templates, userdata*/ 3) show_if = /*templates*/ ctx[1] && /*templates*/ ctx[1].filter(/*func*/ ctx[10]).length < 10;
+    			if (dirty & /*templates, userdata*/ 5) show_if = /*templates*/ ctx[2] && /*templates*/ ctx[2].filter(/*func*/ ctx[12]).length < 10;
 
     			if (show_if) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_4(ctx);
+    					if_block0 = create_if_block_6(ctx);
     					if_block0.c();
     					if_block0.m(div7, t0);
     				}
@@ -6938,12 +6940,12 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (dirty & /*justMyTemplates*/ 4) {
-    				input0.checked = /*justMyTemplates*/ ctx[2];
+    			if (dirty & /*justMyTemplates*/ 8) {
+    				input0.checked = /*justMyTemplates*/ ctx[3];
     			}
 
-    			if (dirty & /*search*/ 16 && input1.value !== /*search*/ ctx[4]) {
-    				set_input_value(input1, /*search*/ ctx[4]);
+    			if (dirty & /*search*/ 32 && input1.value !== /*search*/ ctx[5]) {
+    				set_input_value(input1, /*search*/ ctx[5]);
     			}
 
     			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
@@ -6971,15 +6973,15 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(71:0) {#if userdata}",
+    		source: "(80:0) {#if userdata}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (73:4) {#if templates && templates.filter(t => t.userId === userdata.id).length < 10}
-    function create_if_block_4(ctx) {
+    // (82:4) {#if templates && templates.filter(t => t.userId === userdata.id).length < 10}
+    function create_if_block_6(ctx) {
     	let div12;
     	let div11;
     	let h3;
@@ -7068,75 +7070,75 @@ var app = (function () {
     			button.textContent = "Save";
     			t18 = space();
     			input5 = element("input");
-    			add_location(h3, file$1, 75, 12, 2186);
+    			add_location(h3, file$1, 84, 12, 2483);
     			attr_dev(label0, "for", "name");
-    			add_location(label0, file$1, 79, 24, 2417);
+    			add_location(label0, file$1, 88, 24, 2714);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "class", "form-control");
     			attr_dev(input0, "name", "name");
     			attr_dev(input0, "maxlength", "20");
-    			add_location(input0, file$1, 80, 24, 2473);
+    			add_location(input0, file$1, 89, 24, 2770);
     			attr_dev(div0, "class", "col-12 col-md-4");
-    			add_location(div0, file$1, 78, 20, 2362);
+    			add_location(div0, file$1, 87, 20, 2659);
     			attr_dev(label1, "for", "name");
-    			add_location(label1, file$1, 83, 24, 2647);
+    			add_location(label1, file$1, 92, 24, 2944);
     			attr_dev(input1, "type", "text");
     			attr_dev(input1, "class", "form-control");
     			attr_dev(input1, "name", "searchTerms");
     			attr_dev(input1, "maxlength", "70");
-    			add_location(input1, file$1, 84, 24, 2711);
+    			add_location(input1, file$1, 93, 24, 3008);
     			attr_dev(div1, "class", "col-12 col-md-8");
-    			add_location(div1, file$1, 82, 20, 2592);
+    			add_location(div1, file$1, 91, 20, 2889);
     			attr_dev(div2, "class", "row");
-    			add_location(div2, file$1, 77, 16, 2323);
+    			add_location(div2, file$1, 86, 16, 2620);
     			attr_dev(label2, "for", "name");
-    			add_location(label2, file$1, 89, 24, 2951);
+    			add_location(label2, file$1, 98, 24, 3248);
     			attr_dev(input2, "type", "color");
     			attr_dev(input2, "class", "form-control");
     			attr_dev(input2, "name", "friendcodecolor");
-    			add_location(input2, file$1, 90, 24, 3020);
+    			add_location(input2, file$1, 99, 24, 3317);
     			attr_dev(div3, "class", "col-12 col-md-6");
-    			add_location(div3, file$1, 88, 20, 2896);
+    			add_location(div3, file$1, 97, 20, 3193);
     			attr_dev(label3, "for", "name");
-    			add_location(label3, file$1, 93, 24, 3191);
+    			add_location(label3, file$1, 102, 24, 3488);
     			attr_dev(input3, "type", "color");
     			attr_dev(input3, "class", "form-control");
     			attr_dev(input3, "name", "namecolor");
-    			add_location(input3, file$1, 94, 24, 3253);
+    			add_location(input3, file$1, 103, 24, 3550);
     			attr_dev(div4, "class", "col-12 col-md-6");
-    			add_location(div4, file$1, 92, 20, 3136);
+    			add_location(div4, file$1, 101, 20, 3433);
     			attr_dev(div5, "class", "row");
-    			add_location(div5, file$1, 87, 16, 2857);
+    			add_location(div5, file$1, 96, 16, 3154);
     			attr_dev(label4, "for", "img");
-    			add_location(label4, file$1, 99, 24, 3477);
+    			add_location(label4, file$1, 108, 24, 3774);
     			attr_dev(input4, "type", "file");
     			attr_dev(input4, "name", "img");
-    			add_location(input4, file$1, 101, 28, 3571);
-    			add_location(div6, file$1, 100, 24, 3536);
+    			add_location(input4, file$1, 110, 28, 3868);
+    			add_location(div6, file$1, 109, 24, 3833);
     			attr_dev(div7, "class", "col-12 col-md-6");
-    			add_location(div7, file$1, 98, 20, 3422);
+    			add_location(div7, file$1, 107, 20, 3719);
     			attr_dev(button, "type", "submit");
     			attr_dev(button, "class", "btn btn-primary");
-    			add_location(button, file$1, 106, 28, 3819);
-    			attr_dev(div8, "class", "save-new svelte-aj5kgd");
-    			add_location(div8, file$1, 105, 24, 3767);
+    			add_location(button, file$1, 115, 28, 4116);
+    			attr_dev(div8, "class", "save-new svelte-195lik3");
+    			add_location(div8, file$1, 114, 24, 4064);
     			attr_dev(div9, "class", "col-12 col-md-6");
     			set_style(div9, "position", "relative");
-    			add_location(div9, file$1, 104, 20, 3685);
+    			add_location(div9, file$1, 113, 20, 3982);
     			attr_dev(div10, "class", "row");
-    			add_location(div10, file$1, 97, 16, 3383);
+    			add_location(div10, file$1, 106, 16, 3680);
     			attr_dev(input5, "type", "hidden");
     			attr_dev(input5, "name", "slot");
-    			input5.value = /*unusedSlot*/ ctx[5];
-    			add_location(input5, file$1, 110, 16, 3980);
+    			input5.value = /*unusedSlot*/ ctx[6];
+    			add_location(input5, file$1, 119, 16, 4277);
     			attr_dev(form, "action", "/api/templates/save");
     			attr_dev(form, "method", "post");
     			attr_dev(form, "enctype", "multipart/form-data");
-    			add_location(form, file$1, 76, 12, 2226);
+    			add_location(form, file$1, 85, 12, 2523);
     			attr_dev(div11, "class", "col");
-    			add_location(div11, file$1, 74, 8, 2155);
+    			add_location(div11, file$1, 83, 8, 2452);
     			attr_dev(div12, "class", "row");
-    			add_location(div12, file$1, 73, 4, 2128);
+    			add_location(div12, file$1, 82, 4, 2425);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div12, anchor);
@@ -7180,8 +7182,8 @@ var app = (function () {
     			append_dev(form, input5);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*unusedSlot*/ 32) {
-    				prop_dev(input5, "value", /*unusedSlot*/ ctx[5]);
+    			if (dirty & /*unusedSlot*/ 64) {
+    				prop_dev(input5, "value", /*unusedSlot*/ ctx[6]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -7191,17 +7193,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4.name,
+    		id: create_if_block_6.name,
     		type: "if",
-    		source: "(73:4) {#if templates && templates.filter(t => t.userId === userdata.id).length < 10}",
+    		source: "(82:4) {#if templates && templates.filter(t => t.userId === userdata.id).length < 10}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (173:16) {:else}
-    function create_else_block(ctx) {
+    // (190:16) {:else}
+    function create_else_block_2(ctx) {
     	let div;
 
     	const block = {
@@ -7209,7 +7211,7 @@ var app = (function () {
     			div = element("div");
     			div.textContent = "You don't have any templates";
     			attr_dev(div, "class", "col");
-    			add_location(div, file$1, 173, 16, 7301);
+    			add_location(div, file$1, 190, 16, 7931);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7222,19 +7224,19 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
+    		id: create_else_block_2.name,
     		type: "else",
-    		source: "(173:16) {:else}",
+    		source: "(190:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (134:16) {#if templates}
-    function create_if_block_1(ctx) {
+    // (143:16) {#if templates}
+    function create_if_block_1$1(ctx) {
     	let each_1_anchor;
-    	let each_value = /*filteredTemplates*/ ctx[3].filter(/*func_1*/ ctx[13]);
+    	let each_value = /*filteredTemplates*/ ctx[4].filter(/*func_1*/ ctx[15]);
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -7258,8 +7260,8 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*confirmDelete, filteredTemplates, justMyTemplates, userdata, clickTemplate*/ 397) {
-    				each_value = /*filteredTemplates*/ ctx[3].filter(/*func_1*/ ctx[13]);
+    			if (dirty & /*confirmDelete, filteredTemplates, justMyTemplates, userdata, clickTemplate, previewFontSize, templateWidth*/ 1691) {
+    				each_value = /*filteredTemplates*/ ctx[4].filter(/*func_1*/ ctx[15]);
     				validate_each_argument(each_value);
     				let i;
 
@@ -7290,37 +7292,137 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
+    		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(134:16) {#if templates}",
+    		source: "(143:16) {#if templates}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (157:32) {#if keyword}
-    function create_if_block_3(ctx) {
+    // (158:32) {:else}
+    function create_else_block_1(ctx) {
+    	let img;
+    	let img_src_value;
+
+    	const block = {
+    		c: function create() {
+    			img = element("img");
+    			if (!src_url_equal(img.src, img_src_value = /*template*/ ctx[20].url)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "template");
+    			set_style(img, "width", "100%");
+    			add_location(img, file$1, 158, 32, 6316);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, img, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25 && !src_url_equal(img.src, img_src_value = /*template*/ ctx[20].url)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(img);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_1.name,
+    		type: "else",
+    		source: "(158:32) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (154:32) {#if i === 0}
+    function create_if_block_5(ctx) {
     	let div;
-    	let t_value = /*keyword*/ ctx[20] + "";
-    	let t;
+    	let img;
+    	let img_src_value;
+    	let div_resize_listener;
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			t = text(t_value);
-    			attr_dev(div, "class", "term svelte-aj5kgd");
-    			add_location(div, file$1, 157, 32, 6518);
+    			img = element("img");
+    			if (!src_url_equal(img.src, img_src_value = /*template*/ ctx[20].url)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "template");
+    			set_style(img, "width", "100%");
+    			add_location(img, file$1, 155, 36, 6141);
+    			add_render_callback(() => /*div_elementresize_handler*/ ctx[16].call(div));
+    			add_location(div, file$1, 154, 32, 6065);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			append_dev(div, t);
+    			append_dev(div, img);
+    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[16].bind(div));
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13 && t_value !== (t_value = /*keyword*/ ctx[20] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25 && !src_url_equal(img.src, img_src_value = /*template*/ ctx[20].url)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
+    			div_resize_listener();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(154:32) {#if i === 0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (170:8) {#if keyword}
+    function create_if_block_3(ctx) {
+    	let show_if;
+    	let if_block_anchor;
+
+    	function select_block_type_2(ctx, dirty) {
+    		if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25) show_if = null;
+    		if (show_if == null) show_if = !!(/*template*/ ctx[20].keywords.split(' ').length - 1 > /*i*/ ctx[22]);
+    		if (show_if) return create_if_block_4;
+    		return create_else_block;
+    	}
+
+    	let current_block_type = select_block_type_2(ctx, -1);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (current_block_type === (current_block_type = select_block_type_2(ctx, dirty)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 
@@ -7328,17 +7430,79 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(157:32) {#if keyword}",
+    		source: "(170:8) {#if keyword}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (156:32) {#each template.keywords.split(' ') as keyword}
+    // (173:9) {:else}
+    function create_else_block(ctx) {
+    	let t_value = `${/*keyword*/ ctx[23]}` + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25 && t_value !== (t_value = `${/*keyword*/ ctx[23]}` + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(173:9) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (171:9) {#if template.keywords.split(' ').length - 1 > i}
+    function create_if_block_4(ctx) {
+    	let t_value = `${/*keyword*/ ctx[23]}, ` + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25 && t_value !== (t_value = `${/*keyword*/ ctx[23]}, ` + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(171:9) {#if template.keywords.split(' ').length - 1 > i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (169:8) {#each template.keywords.split(' ') as keyword, i}
     function create_each_block_1(ctx) {
     	let if_block_anchor;
-    	let if_block = /*keyword*/ ctx[20] && create_if_block_3(ctx);
+    	let if_block = /*keyword*/ ctx[23] && create_if_block_3(ctx);
 
     	const block = {
     		c: function create() {
@@ -7350,7 +7514,7 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (/*keyword*/ ctx[20]) {
+    			if (/*keyword*/ ctx[23]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -7373,14 +7537,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(156:32) {#each template.keywords.split(' ') as keyword}",
+    		source: "(169:8) {#each template.keywords.split(' ') as keyword, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (163:24) {#if template.userId === userdata.id}
+    // (180:24) {#if template.userId === userdata.id}
     function create_if_block_2(ctx) {
     	let div1;
     	let div0;
@@ -7389,7 +7553,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[15](/*template*/ ctx[17]);
+    		return /*click_handler_1*/ ctx[18](/*template*/ ctx[20]);
     	}
 
     	const block = {
@@ -7401,13 +7565,13 @@ var app = (function () {
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "btn btn-danger");
     			set_style(button, "width", "100%");
-    			add_location(button, file$1, 165, 32, 6928);
+    			add_location(button, file$1, 182, 32, 7559);
     			attr_dev(div0, "class", "col");
     			set_style(div0, "position", "relative");
-    			set_style(div0, "margin", "12px");
-    			add_location(div0, file$1, 164, 28, 6838);
+    			set_style(div0, "margin", "0px 12px 12px 12px");
+    			add_location(div0, file$1, 181, 28, 7454);
     			attr_dev(div1, "class", "row");
-    			add_location(div1, file$1, 163, 24, 6791);
+    			add_location(div1, file$1, 180, 24, 7407);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -7433,36 +7597,30 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(163:24) {#if template.userId === userdata.id}",
+    		source: "(180:24) {#if template.userId === userdata.id}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:16) {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template}
+    // (144:16) {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template, i}
     function create_each_block(ctx) {
     	let div7;
     	let div6;
     	let div1;
     	let div0;
     	let h5;
-    	let t0_value = /*template*/ ctx[17].name + "";
+    	let t0_value = /*template*/ ctx[20].name + "";
     	let t0;
     	let t1;
     	let button;
-    	let img;
-    	let img_src_value;
-    	let t2;
     	let div4;
+    	let t2;
     	let div2;
-    	let input0;
-    	let input0_value_value;
     	let t3;
     	let t4;
     	let div3;
-    	let input1;
-    	let input1_value_value;
     	let t5;
     	let t6;
     	let div5;
@@ -7470,7 +7628,15 @@ var app = (function () {
     	let t8;
     	let mounted;
     	let dispose;
-    	let each_value_1 = /*template*/ ctx[17].keywords.split(' ');
+
+    	function select_block_type_1(ctx, dirty) {
+    		if (/*i*/ ctx[22] === 0) return create_if_block_5;
+    		return create_else_block_1;
+    	}
+
+    	let current_block_type = select_block_type_1(ctx);
+    	let if_block0 = current_block_type(ctx);
+    	let each_value_1 = /*template*/ ctx[20].keywords.split(' ');
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
 
@@ -7479,10 +7645,10 @@ var app = (function () {
     	}
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[14](/*template*/ ctx[17]);
+    		return /*click_handler*/ ctx[17](/*template*/ ctx[20]);
     	}
 
-    	let if_block = /*template*/ ctx[17].userId === /*userdata*/ ctx[0].id && create_if_block_2(ctx);
+    	let if_block1 = /*template*/ ctx[20].userId === /*userdata*/ ctx[0].id && create_if_block_2(ctx);
 
     	const block = {
     		c: function create() {
@@ -7494,16 +7660,14 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			button = element("button");
-    			img = element("img");
-    			t2 = space();
     			div4 = element("div");
+    			if_block0.c();
+    			t2 = space();
     			div2 = element("div");
-    			input0 = element("input");
-    			t3 = text("\r\n                                    Friend Code");
+    			t3 = text("0000-0000-0000");
     			t4 = space();
     			div3 = element("div");
-    			input1 = element("input");
-    			t5 = text("\r\n                                    Name");
+    			t5 = text("Example");
     			t6 = space();
     			div5 = element("div");
 
@@ -7512,45 +7676,37 @@ var app = (function () {
     			}
 
     			t7 = space();
-    			if (if_block) if_block.c();
+    			if (if_block1) if_block1.c();
     			t8 = space();
-    			add_location(h5, file$1, 139, 32, 5344);
+    			add_location(h5, file$1, 148, 32, 5711);
     			attr_dev(div0, "class", "col-12 no-gutters");
-    			add_location(div0, file$1, 138, 28, 5279);
+    			add_location(div0, file$1, 147, 28, 5646);
     			attr_dev(div1, "class", "row no-gutters");
-    			add_location(div1, file$1, 137, 24, 5221);
-    			if (!src_url_equal(img.src, img_src_value = /*template*/ ctx[17].url)) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "template");
-    			set_style(img, "width", "100%");
-    			add_location(img, file$1, 143, 28, 5591);
-    			attr_dev(input0, "class", "color-display svelte-aj5kgd");
-    			attr_dev(input0, "type", "color");
-    			input0.readOnly = true;
-    			input0.value = input0_value_value = /*template*/ ctx[17].color_friendcode;
-    			add_location(input0, file$1, 146, 36, 5812);
-    			set_style(div2, "text-align", "left");
-    			attr_dev(div2, "class", "col");
-    			add_location(div2, file$1, 145, 32, 5733);
-    			attr_dev(input1, "class", "color-display svelte-aj5kgd");
-    			attr_dev(input1, "type", "color");
-    			input1.readOnly = true;
-    			input1.value = input1_value_value = /*template*/ ctx[17].color_name;
-    			add_location(input1, file$1, 150, 36, 6101);
-    			set_style(div3, "text-align", "left");
-    			attr_dev(div3, "class", "col");
-    			add_location(div3, file$1, 149, 32, 6022);
-    			attr_dev(div4, "class", "row");
-    			add_location(div4, file$1, 144, 28, 5682);
-    			attr_dev(div5, "class", "search-terms svelte-aj5kgd");
-    			add_location(div5, file$1, 154, 28, 6330);
+    			set_style(div1, "margin-left", "8px");
+    			set_style(div1, "margin-top", "4px");
+    			add_location(div1, file$1, 146, 24, 5545);
+    			attr_dev(div2, "class", "card-text svelte-195lik3");
+    			set_style(div2, "color", /*template*/ ctx[20].color_friendcode);
+    			set_style(div2, "top", "11.5%");
+    			set_style(div2, "font-size", /*previewFontSize*/ ctx[7] + "px");
+    			add_location(div2, file$1, 160, 32, 6449);
+    			attr_dev(div3, "class", "card-text svelte-195lik3");
+    			set_style(div3, "color", /*template*/ ctx[20].color_name);
+    			set_style(div3, "top", "26.7%");
+    			set_style(div3, "font-size", /*previewFontSize*/ ctx[7] + "px");
+    			add_location(div3, file$1, 163, 32, 6683);
+    			attr_dev(div4, "class", "card-preview svelte-195lik3");
+    			add_location(div4, file$1, 152, 28, 5958);
+    			attr_dev(div5, "class", "search-terms svelte-195lik3");
+    			add_location(div5, file$1, 167, 28, 6936);
     			attr_dev(button, "type", "btn btn-primary");
-    			attr_dev(button, "class", "template-choice svelte-aj5kgd");
-    			add_location(button, file$1, 142, 24, 5462);
-    			attr_dev(div6, "class", "floating-card mdc-elevation--z20 svelte-aj5kgd");
-    			add_location(div6, file$1, 136, 20, 5149);
+    			attr_dev(button, "class", "template-choice svelte-195lik3");
+    			add_location(button, file$1, 151, 24, 5829);
+    			attr_dev(div6, "class", "floating-card mdc-elevation--z8 svelte-195lik3");
+    			add_location(div6, file$1, 145, 20, 5474);
     			attr_dev(div7, "class", "col-12 col-md-4");
     			set_style(div7, "position", "relative");
-    			add_location(div7, file$1, 135, 16, 5071);
+    			add_location(div7, file$1, 144, 16, 5396);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div7, anchor);
@@ -7561,15 +7717,13 @@ var app = (function () {
     			append_dev(h5, t0);
     			append_dev(div6, t1);
     			append_dev(div6, button);
-    			append_dev(button, img);
-    			append_dev(button, t2);
     			append_dev(button, div4);
+    			if_block0.m(div4, null);
+    			append_dev(div4, t2);
     			append_dev(div4, div2);
-    			append_dev(div2, input0);
     			append_dev(div2, t3);
     			append_dev(div4, t4);
     			append_dev(div4, div3);
-    			append_dev(div3, input1);
     			append_dev(div3, t5);
     			append_dev(button, t6);
     			append_dev(button, div5);
@@ -7579,7 +7733,7 @@ var app = (function () {
     			}
 
     			append_dev(div6, t7);
-    			if (if_block) if_block.m(div6, null);
+    			if (if_block1) if_block1.m(div6, null);
     			append_dev(div7, t8);
 
     			if (!mounted) {
@@ -7589,22 +7743,27 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13 && t0_value !== (t0_value = /*template*/ ctx[17].name + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25 && t0_value !== (t0_value = /*template*/ ctx[20].name + "")) set_data_dev(t0, t0_value);
+    			if_block0.p(ctx, dirty);
 
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13 && !src_url_equal(img.src, img_src_value = /*template*/ ctx[17].url)) {
-    				attr_dev(img, "src", img_src_value);
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25) {
+    				set_style(div2, "color", /*template*/ ctx[20].color_friendcode);
     			}
 
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13 && input0_value_value !== (input0_value_value = /*template*/ ctx[17].color_friendcode)) {
-    				prop_dev(input0, "value", input0_value_value);
+    			if (dirty & /*previewFontSize*/ 128) {
+    				set_style(div2, "font-size", /*previewFontSize*/ ctx[7] + "px");
     			}
 
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13 && input1_value_value !== (input1_value_value = /*template*/ ctx[17].color_name)) {
-    				prop_dev(input1, "value", input1_value_value);
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25) {
+    				set_style(div3, "color", /*template*/ ctx[20].color_name);
     			}
 
-    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 13) {
-    				each_value_1 = /*template*/ ctx[17].keywords.split(' ');
+    			if (dirty & /*previewFontSize*/ 128) {
+    				set_style(div3, "font-size", /*previewFontSize*/ ctx[7] + "px");
+    			}
+
+    			if (dirty & /*filteredTemplates, justMyTemplates, userdata*/ 25) {
+    				each_value_1 = /*template*/ ctx[20].keywords.split(' ');
     				validate_each_argument(each_value_1);
     				let i;
 
@@ -7627,23 +7786,24 @@ var app = (function () {
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (/*template*/ ctx[17].userId === /*userdata*/ ctx[0].id) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
+    			if (/*template*/ ctx[20].userId === /*userdata*/ ctx[0].id) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_2(ctx);
-    					if_block.c();
-    					if_block.m(div6, null);
+    					if_block1 = create_if_block_2(ctx);
+    					if_block1.c();
+    					if_block1.m(div6, null);
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div7);
+    			if_block0.d();
     			destroy_each(each_blocks, detaching);
-    			if (if_block) if_block.d();
+    			if (if_block1) if_block1.d();
     			mounted = false;
     			dispose();
     		}
@@ -7653,7 +7813,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(135:16) {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template}",
+    		source: "(144:16) {#each filteredTemplates.filter(t => justMyTemplates ? t.userId === userdata.id : true) as template, i}",
     		ctx
     	});
 
@@ -7709,6 +7869,8 @@ var app = (function () {
     	return block;
     }
 
+    const PREVIEW_FONT_RATIO = 21.891;
+
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Templates', slots, []);
@@ -7724,18 +7886,20 @@ var app = (function () {
     	let fuse;
     	let search = '';
     	let unusedSlot = 0;
+    	let templateWidth = 0;
+    	let previewFontSize = 0;
 
     	onMount(async () => {
-    		$$invalidate(1, templates = await searchTemplates());
+    		$$invalidate(2, templates = await searchTemplates());
 
-    		$$invalidate(1, templates = templates.sort((t1, t2) => {
+    		$$invalidate(2, templates = templates.sort((t1, t2) => {
     			if (t1.userId === userdata.id && t2.userId === userdata.id) return 0;
     			if (t1.userId !== userdata.id && t2.userId !== userdata.id) return 0;
     			if (t1.userId === userdata.id) return -1;
     			return 1;
     		}));
 
-    		$$invalidate(3, filteredTemplates = templates);
+    		$$invalidate(4, filteredTemplates = templates);
 
     		const options = {
     			shouldSort: true,
@@ -7745,11 +7909,11 @@ var app = (function () {
 
     		fuse = new Fuse(templates, options);
     		let sorted = templates.filter(t => t.userId === userdata.id).sort((t1, t2) => parseInt(t1.slot) > parseInt(t2.slot) ? 1 : -1);
-    		sorted.forEach(t => unusedSlot === parseInt(t.slot) && $$invalidate(5, unusedSlot++, unusedSlot));
+    		sorted.forEach(t => unusedSlot === parseInt(t.slot) && $$invalidate(6, unusedSlot++, unusedSlot));
     	});
 
     	function filterTemplates() {
-    		if (search) $$invalidate(3, filteredTemplates = fuse.search(search).map(v => v.item)); else $$invalidate(3, filteredTemplates = templates);
+    		if (search) $$invalidate(4, filteredTemplates = fuse.search(search).map(v => v.item)); else $$invalidate(4, filteredTemplates = templates);
     	}
 
     	function clickTemplate(id) {
@@ -7776,21 +7940,27 @@ var app = (function () {
 
     	function input0_change_handler() {
     		justMyTemplates = this.checked;
-    		$$invalidate(2, justMyTemplates);
+    		$$invalidate(3, justMyTemplates);
     	}
 
     	function input1_input_handler() {
     		search = this.value;
-    		$$invalidate(4, search);
+    		$$invalidate(5, search);
     	}
 
     	const func_1 = t => justMyTemplates ? t.userId === userdata.id : true;
+
+    	function div_elementresize_handler() {
+    		templateWidth = this.clientWidth;
+    		$$invalidate(1, templateWidth);
+    	}
+
     	const click_handler = template => clickTemplate(template.id);
     	const click_handler_1 = async template => await confirmDelete(template.name, template.slot);
 
     	$$self.$$set = $$props => {
     		if ('userdata' in $$props) $$invalidate(0, userdata = $$props.userdata);
-    		if ('setTemplate' in $$props) $$invalidate(9, setTemplate = $$props.setTemplate);
+    		if ('setTemplate' in $$props) $$invalidate(11, setTemplate = $$props.setTemplate);
     	};
 
     	$$self.$capture_state = () => ({
@@ -7799,6 +7969,7 @@ var app = (function () {
     		searchTemplates,
     		deleteTemplate,
     		Fuse,
+    		PREVIEW_FONT_RATIO,
     		userdata,
     		setTemplate,
     		templates,
@@ -7807,6 +7978,8 @@ var app = (function () {
     		fuse,
     		search,
     		unusedSlot,
+    		templateWidth,
+    		previewFontSize,
     		filterTemplates,
     		clickTemplate,
     		confirmDelete
@@ -7814,26 +7987,36 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('userdata' in $$props) $$invalidate(0, userdata = $$props.userdata);
-    		if ('setTemplate' in $$props) $$invalidate(9, setTemplate = $$props.setTemplate);
-    		if ('templates' in $$props) $$invalidate(1, templates = $$props.templates);
-    		if ('justMyTemplates' in $$props) $$invalidate(2, justMyTemplates = $$props.justMyTemplates);
-    		if ('filteredTemplates' in $$props) $$invalidate(3, filteredTemplates = $$props.filteredTemplates);
+    		if ('setTemplate' in $$props) $$invalidate(11, setTemplate = $$props.setTemplate);
+    		if ('templates' in $$props) $$invalidate(2, templates = $$props.templates);
+    		if ('justMyTemplates' in $$props) $$invalidate(3, justMyTemplates = $$props.justMyTemplates);
+    		if ('filteredTemplates' in $$props) $$invalidate(4, filteredTemplates = $$props.filteredTemplates);
     		if ('fuse' in $$props) fuse = $$props.fuse;
-    		if ('search' in $$props) $$invalidate(4, search = $$props.search);
-    		if ('unusedSlot' in $$props) $$invalidate(5, unusedSlot = $$props.unusedSlot);
+    		if ('search' in $$props) $$invalidate(5, search = $$props.search);
+    		if ('unusedSlot' in $$props) $$invalidate(6, unusedSlot = $$props.unusedSlot);
+    		if ('templateWidth' in $$props) $$invalidate(1, templateWidth = $$props.templateWidth);
+    		if ('previewFontSize' in $$props) $$invalidate(7, previewFontSize = $$props.previewFontSize);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*templateWidth*/ 2) {
+    			$$invalidate(7, previewFontSize = templateWidth / PREVIEW_FONT_RATIO);
+    		}
+    	};
+
     	return [
     		userdata,
+    		templateWidth,
     		templates,
     		justMyTemplates,
     		filteredTemplates,
     		search,
     		unusedSlot,
+    		previewFontSize,
     		filterTemplates,
     		clickTemplate,
     		confirmDelete,
@@ -7842,6 +8025,7 @@ var app = (function () {
     		input0_change_handler,
     		input1_input_handler,
     		func_1,
+    		div_elementresize_handler,
     		click_handler,
     		click_handler_1
     	];
@@ -7850,7 +8034,7 @@ var app = (function () {
     class Templates extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { userdata: 0, setTemplate: 9 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { userdata: 0, setTemplate: 11 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -7880,8 +8064,8 @@ var app = (function () {
     /* src\App.svelte generated by Svelte v3.46.3 */
     const file = "src\\App.svelte";
 
-    // (33:12) {#if userdata.id}
-    function create_if_block(ctx) {
+    // (36:12) {#if userdata.id}
+    function create_if_block_1(ctx) {
     	let div5;
     	let div4;
     	let div0;
@@ -7944,47 +8128,48 @@ var app = (function () {
     			a5.textContent = "Templates";
     			set_style(div0, "height", "70px");
     			set_style(div0, "width", "1px");
-    			add_location(div0, file, 35, 6, 1138);
+    			add_location(div0, file, 38, 6, 1271);
     			attr_dev(a0, "href", "/settings");
-    			add_location(a0, file, 37, 7, 1215);
+    			add_location(a0, file, 40, 7, 1348);
     			attr_dev(div1, "class", "item");
-    			add_location(div1, file, 36, 6, 1188);
+    			add_location(div1, file, 39, 6, 1321);
     			attr_dev(input, "type", "hidden");
     			attr_dev(input, "name", "delete");
     			input.value = "YES";
-    			add_location(input, file, 43, 8, 1366);
+    			add_location(input, file, 46, 8, 1499);
     			attr_dev(a1, "href", "/");
     			attr_dev(a1, "onclick", "$(this).closest('form').submit();return false;");
-    			add_location(a1, file, 44, 8, 1425);
+    			add_location(a1, file, 47, 8, 1558);
     			attr_dev(form, "action", "/api/delete");
     			attr_dev(form, "method", "post");
-    			add_location(form, file, 42, 7, 1315);
+    			add_location(form, file, 45, 7, 1448);
     			attr_dev(div2, "class", "item");
-    			add_location(div2, file, 41, 6, 1288);
+    			add_location(div2, file, 44, 6, 1421);
     			attr_dev(a2, "href", "/logout");
-    			add_location(a2, file, 50, 7, 1598);
+    			add_location(a2, file, 53, 7, 1731);
     			attr_dev(div3, "class", "item");
-    			add_location(div3, file, 49, 6, 1571);
+    			add_location(div3, file, 52, 6, 1704);
     			attr_dev(div4, "class", "usermenu");
     			set_style(div4, "display", "none");
-    			add_location(div4, file, 34, 5, 1085);
+    			add_location(div4, file, 37, 5, 1218);
     			if (!src_url_equal(img.src, img_src_value = /*userdata*/ ctx[1].avatar)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "id", "useravatar");
     			attr_dev(img, "alt", "avatar");
-    			add_location(img, file, 55, 5, 1679);
+    			add_location(img, file, 58, 5, 1812);
     			attr_dev(div5, "id", "userinfo");
-    			add_location(div5, file, 33, 4, 1059);
+    			add_location(div5, file, 36, 4, 1192);
     			attr_dev(a3, "class", "btn btn-primary");
     			attr_dev(a3, "href", "/");
     			attr_dev(a3, "role", "button");
-    			add_location(a3, file, 57, 4, 1767);
+    			add_location(a3, file, 60, 4, 1939);
     			attr_dev(a4, "class", "btn btn-primary");
     			attr_dev(a4, "href", a4_href_value = "/p/" + /*userdata*/ ctx[1].profileId);
     			attr_dev(a4, "role", "button");
-    			add_location(a4, file, 58, 4, 1840);
+    			add_location(a4, file, 61, 4, 2012);
     			attr_dev(a5, "class", "btn btn-primary");
     			attr_dev(a5, "href", "/templates");
     			attr_dev(a5, "role", "button");
-    			add_location(a5, file, 59, 4, 1938);
+    			add_location(a5, file, 62, 4, 2110);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
@@ -8015,6 +8200,7 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen_dev(img, "click", /*toggleusermenu*/ ctx[2], false, false, false),
+    					listen_dev(img, "error", /*loadgeneric*/ ctx[3], false, false, false),
     					action_destroyer(link.call(null, a3)),
     					action_destroyer(link.call(null, a4)),
     					action_destroyer(link.call(null, a5))
@@ -8047,16 +8233,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block_1.name,
     		type: "if",
-    		source: "(33:12) {#if userdata.id}",
+    		source: "(36:12) {#if userdata.id}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (63:8) <Router {url}>
+    // (66:8) <Router {url}>
     function create_default_slot(ctx) {
     	let route0;
     	let t0;
@@ -8074,7 +8260,7 @@ var app = (function () {
     				path: "/templates",
     				component: Templates,
     				userdata: /*userdata*/ ctx[1],
-    				setTemplate: /*setTemplate*/ ctx[3]
+    				setTemplate: /*setTemplate*/ ctx[4]
     			},
     			$$inline: true
     		});
@@ -8186,7 +8372,55 @@ var app = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(63:8) <Router {url}>",
+    		source: "(66:8) <Router {url}>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (73:2) {#if !userdata.id}
+    function create_if_block(ctx) {
+    	let div;
+    	let a;
+    	let button;
+    	let a_href_value;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			a = element("a");
+    			button = element("button");
+    			button.textContent = "Discord Login";
+    			attr_dev(button, "class", "btn btn-primary");
+    			attr_dev(button, "type", "button");
+    			add_location(button, file, 75, 4, 2729);
+    			attr_dev(a, "id", "loginDiscord");
+    			attr_dev(a, "href", a_href_value = /*userdata*/ ctx[1].loginUrl);
+    			add_location(a, file, 74, 3, 2677);
+    			attr_dev(div, "class", "nameentry needtologin");
+    			add_location(div, file, 73, 2, 2637);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, a);
+    			append_dev(a, button);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*userdata*/ 2 && a_href_value !== (a_href_value = /*userdata*/ ctx[1].loginUrl)) {
+    				attr_dev(a, "href", a_href_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(73:2) {#if !userdata.id}",
     		ctx
     	});
 
@@ -8206,8 +8440,9 @@ var app = (function () {
     	let t2;
     	let t3;
     	let router;
+    	let t4;
     	let current;
-    	let if_block = /*userdata*/ ctx[1].id && create_if_block(ctx);
+    	let if_block0 = /*userdata*/ ctx[1].id && create_if_block_1(ctx);
 
     	router = new Router({
     			props: {
@@ -8217,6 +8452,8 @@ var app = (function () {
     			},
     			$$inline: true
     		});
+
+    	let if_block1 = !/*userdata*/ ctx[1].id && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -8230,29 +8467,31 @@ var app = (function () {
     			h1 = element("h1");
     			h1.textContent = "Profile";
     			t2 = space();
-    			if (if_block) if_block.c();
+    			if (if_block0) if_block0.c();
     			t3 = space();
     			create_component(router.$$.fragment);
+    			t4 = space();
+    			if (if_block1) if_block1.c();
     			attr_dev(img, "class", "center-block");
     			if (!src_url_equal(img.src, img_src_value = "/css/img/logo.png")) attr_dev(img, "src", img_src_value);
     			set_style(img, "width", "300px");
     			set_style(img, "height", "auto");
     			set_style(img, "margin-top", "0");
     			attr_dev(img, "alt", "logo");
-    			add_location(img, file, 28, 5, 871);
+    			add_location(img, file, 31, 5, 1004);
     			attr_dev(a, "href", "https://discord.gg/rsplatoon");
     			attr_dev(a, "target", "_blank");
-    			add_location(a, file, 27, 4, 809);
-    			add_location(h1, file, 30, 4, 995);
-    			add_location(div0, file, 26, 3, 798);
+    			add_location(a, file, 30, 4, 942);
+    			add_location(h1, file, 33, 4, 1128);
+    			add_location(div0, file, 29, 3, 931);
     			attr_dev(div1, "class", "jumbotron");
-    			add_location(div1, file, 25, 2, 770);
+    			add_location(div1, file, 28, 2, 903);
     			attr_dev(div2, "class", "container");
     			set_style(div2, "margin-bottom", "100px");
     			set_style(div2, "padding-left", "0");
     			set_style(div2, "padding-right", "0");
-    			add_location(div2, file, 24, 1, 683);
-    			add_location(main, file, 23, 0, 674);
+    			add_location(div2, file, 27, 1, 816);
+    			add_location(main, file, 26, 0, 807);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8267,33 +8506,48 @@ var app = (function () {
     			append_dev(div0, t0);
     			append_dev(div0, h1);
     			append_dev(div1, t2);
-    			if (if_block) if_block.m(div1, null);
+    			if (if_block0) if_block0.m(div1, null);
     			append_dev(div2, t3);
     			mount_component(router, div2, null);
+    			append_dev(div2, t4);
+    			if (if_block1) if_block1.m(div2, null);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
     			if (/*userdata*/ ctx[1].id) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block(ctx);
-    					if_block.c();
-    					if_block.m(div1, null);
+    					if_block0 = create_if_block_1(ctx);
+    					if_block0.c();
+    					if_block0.m(div1, null);
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
     			}
 
     			const router_changes = {};
     			if (dirty & /*url*/ 1) router_changes.url = /*url*/ ctx[0];
 
-    			if (dirty & /*$$scope, userdata*/ 18) {
+    			if (dirty & /*$$scope, userdata*/ 34) {
     				router_changes.$$scope = { dirty, ctx };
     			}
 
     			router.$set(router_changes);
+
+    			if (!/*userdata*/ ctx[1].id) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block(ctx);
+    					if_block1.c();
+    					if_block1.m(div2, null);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -8306,8 +8560,9 @@ var app = (function () {
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
-    			if (if_block) if_block.d();
+    			if (if_block0) if_block0.d();
     			destroy_component(router);
+    			if (if_block1) if_block1.d();
     		}
     	};
 
@@ -8329,6 +8584,9 @@ var app = (function () {
     	let userdata = {};
     	onMount(async () => $$invalidate(1, userdata = await userData()));
     	const toggleusermenu = () => jQuery(".usermenu").slideToggle();
+
+    	// Load Discord image as fallback if avatar is not available
+    	const loadgeneric = () => useravatar.src = "/css/img/discord.png";
 
     	const setTemplate = id => {
     		$$invalidate(1, userdata.template = id, userdata);
@@ -8358,6 +8616,7 @@ var app = (function () {
     		url,
     		userdata,
     		toggleusermenu,
+    		loadgeneric,
     		setTemplate
     	});
 
@@ -8370,7 +8629,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [url, userdata, toggleusermenu, setTemplate];
+    	return [url, userdata, toggleusermenu, loadgeneric, setTemplate];
     }
 
     class App extends SvelteComponentDev {

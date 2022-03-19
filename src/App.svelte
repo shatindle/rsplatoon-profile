@@ -70,6 +70,13 @@
             <Route path="/p/:profileId" component={Profile} />
             <Route path="*" component={Home} {userdata} />
         </Router>
+		{#if !userdata.id}
+		<div class="nameentry needtologin">
+			<a id="loginDiscord" href={userdata.loginUrl}>
+				<button class="btn btn-primary" type="button">Discord Login</button>
+			</a>
+		</div>
+		{/if}
 	</div>
 </main>
 
