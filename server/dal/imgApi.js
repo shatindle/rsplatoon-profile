@@ -1,11 +1,11 @@
 const ImgurAnonymousUploader = require('imgur-anonymous-uploader');
 const imgurSettings = require("../../imgur.json");
 const sizeOf = require('image-size');
-const deepai = require('deepai'); 
-const deepaiSettings = require("../../deepai.json");
+// const deepai = require('deepai'); 
+// const deepaiSettings = require("../../deepai.json");
 const databaseApi = require("./databaseApi");
 
-deepai.setApiKey(deepaiSettings.apikey);
+// deepai.setApiKey(deepaiSettings.apikey);
 
 // only allow jpg and png
 sizeOf.disableTypes(["bmp", "cur", "dds", "gif", "icns", "ico", "j2c",
@@ -19,6 +19,9 @@ const uploader = new ImgurAnonymousUploader(imgurSettings.clientid);
  * @returns The link and delete hash if successful
  */
 async function createDrip(userId, img) {
+    // until we have an alternative to the nsfw API, disable this path
+    throw "UPLOAD LIMIT EXCEEDED";
+
     var userData = await databaseApi.getUserProfileByUserId(userId);
 
     var oldDripDeleteHash = null;
@@ -48,12 +51,13 @@ async function createDrip(userId, img) {
             uploadAttempt: true
         });
 
-        var resp = await deepai.callStandardApi("nsfw-detector", {
-            image: img
-        });
+        // TODO: figure out an alternative to this...
+        // var resp = await deepai.callStandardApi("nsfw-detector", {
+        //     image: img
+        // });
     
-        if (resp.output.nsfw_score > 0.6)
-            throw "Possible NSFW content: " + resp.output.nsfw_score;
+        // if (resp.output.nsfw_score > 0.6)
+        //     throw "Possible NSFW content: " + resp.output.nsfw_score;
     
         const response = await uploader.uploadBuffer(img);
 
@@ -105,6 +109,9 @@ async function uploadCard(userId, img) {
 }
 
 async function uploadTemplate(userId, slot, img, name, searchTerms, friendcodecolor, namecolor) {
+    // until we have an alternative to the nsfw API, disable this path
+    throw "UPLOAD LIMIT EXCEEDED";
+
     const dimensions = sizeOf(img);
 
     if (dimensions.width !== 1204)
@@ -118,12 +125,13 @@ async function uploadTemplate(userId, slot, img, name, searchTerms, friendcodeco
             uploadAttempt: true
         });
 
-        var resp = await deepai.callStandardApi("nsfw-detector", {
-            image: img
-        });
+        // TODO: figure out an alternative to this...
+        // var resp = await deepai.callStandardApi("nsfw-detector", {
+        //     image: img
+        // });
     
-        if (resp.output.nsfw_score > 0.6)
-            throw "Possible NSFW content: " + resp.output.nsfw_score;
+        // if (resp.output.nsfw_score > 0.6)
+        //     throw "Possible NSFW content: " + resp.output.nsfw_score;
     
         const response = await uploader.uploadBuffer(img);
 

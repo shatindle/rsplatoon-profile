@@ -43,6 +43,11 @@ async function getPage(req, res, next) {
  * @param {Function} next The next function to run if this one has nothing to do
  */
 async function postDrip(req, res, next) {
+    // TODO: figure out a way to re-enable this once we have an alternative to the nsfw API
+    return res.status(500).send({
+        body: "error"
+    });
+
     try {
         if (!req.session.userId)
             return res.redirect('/');
