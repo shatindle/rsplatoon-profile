@@ -4,16 +4,6 @@ LABEL org.opencontainers.image.title="r/Splatoon Profile" \
       org.opencontainers.image.description="Profiles for r/Splatoon users" \
       org.opencontainers.image.authors="@shane on Discord"
 
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-
-WORKDIR /home/node/app
-
-COPY . .
-
-USER node
-
-COPY --chown=node:node . .
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcairo2-dev \
@@ -23,7 +13,18 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     libtool \
     autoconf \
-    automake
+    automake \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+
+WORKDIR /home/node/app
+
+COPY . .
+
+USER node
+
+COPY --chown=node:node . .
 
 RUN npm install
 RUN { npm audit fix || true; }
