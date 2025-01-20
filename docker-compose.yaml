@@ -15,6 +15,8 @@ services:
       - ./firebase.json:/home/node/app/firebase.json:ro
       - ./imgur.json:/home/node/app/imgur.json:ro
       - ./settings.json:/home/node/app/settings.json:ro
+    ports:
+      - '5003:5003'
   rsplatoon-profile-site-tunnel:
     image: cloudflare/cloudflared
     container_name: rsplatoon-profile-site-tunnel
