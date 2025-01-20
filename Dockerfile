@@ -23,8 +23,7 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     libtool \
     autoconf \
-    automake \
-    && rm -rf /var/lib/apt/lists/*
+    automake
 
 RUN npm install
 RUN { npm audit fix || true; }
