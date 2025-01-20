@@ -32,4 +32,4 @@ RUN npm run build
 RUN rm -rf ./node_modules
 RUN npm install --only=prod
 
-ENTRYPOINT ["node", "server.js"]
+ENTRYPOINT ["node", "server/server.js"]
