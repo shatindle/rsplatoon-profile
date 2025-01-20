@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:16-alpine
 
 LABEL org.opencontainers.image.title="r/Splatoon Profile" \
       org.opencontainers.image.description="Profiles for r/Splatoon users" \
