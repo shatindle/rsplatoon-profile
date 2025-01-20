@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  rsplatoon-profile-site:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rsplatoon-profile-site
+    restart: unless-stopped
+    networks:
+      - rsplatoon-profile-site
+    volumes:
+      - ./deepai.json:/home/node/app/deepai.json:ro
+      - ./discord.json:/home/node/app/discord.json:ro
+      - ./firebase.json:/home/node/app/firebase.json:ro
+      - ./imgur.json:/home/node/app/imgur.json:ro
+      - ./settings.json:/home/node/app/settings.json:ro
+  rsplatoon-profile-site-tunnel:
+    image: cloudflare/cloudflared
+    container_name: rsplatoon-profile-site-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    networks:
+      - rsplatoon-profile-site
+    env_file:
+      - .env
+    depends_on:
+      - rsplatoon-profile-site
+
+networks:
+  rsplatoon-profile-site:

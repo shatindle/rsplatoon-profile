@@ -9,9 +9,7 @@ const app = express();
 
 var server = require("http").createServer(app);
 
-if (!appSettings.secure && appSettings.secureCookie) {
-    app.set('trust proxy', 'loopback');
-}
+app.enable('trust proxy');
 
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');

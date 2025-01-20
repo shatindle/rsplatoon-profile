@@ -20,18 +20,8 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      
       # Runs a set of commands using the runners shell
-      - name: Build and deploy the application
+      - name: Copy the application to run folder
         run: |
-          cd $GITHUB_WORKSPACE
-          npm install
-          npm audit fix || true
-          npm run build
-          rm -rf $GITHUB_WORKSPACE/node_modules
-          npm install --only=prod
-          pm2 stop profile
-          cp -r $GITHUB_WORKSPACE/* /home/sha_tindle/repos/rsplatoon-profile
-          pm2 restart profile
+          git -C /var/repos/rsplatoon-profile pull
+          bash /var/dockerstart/rsplatoon-profile.sh
