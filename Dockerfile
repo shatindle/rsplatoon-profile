@@ -14,6 +14,17 @@ USER node
 
 COPY --chown=node:node . .
 
+RUN apk add --update --no-cache \
+    make \
+    g++ \
+    jpeg-dev \
+    cairo-dev \
+    giflib-dev \
+    pango-dev \
+    libtool \
+    autoconf \
+    automake
+
 RUN npm install
 RUN { npm audit fix || true; }
 RUN npm run build
